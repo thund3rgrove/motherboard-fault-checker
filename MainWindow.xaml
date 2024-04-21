@@ -36,23 +36,24 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Description:" FontWeight="Bold" Margin="0 0 0 5"/>
+            <TextBlock Text="Описание" FontWeight="Bold" Margin="0 0 0 5"/>
             <TextBox x:Name="descriptionTextBox" VerticalScrollBarVisibility="Auto" IsReadOnly="True" 
                      Height="Auto" TextWrapping="Wrap" Margin="0 0 5 5" Grid.Row="1"/>
 
             <TextBlock Text="Исправно, если" FontWeight="Bold" Margin="0 10 0 5" Grid.Row="2" Grid.Column="0"/>
             <TextBox x:Name="measurementWorkingTextBox" VerticalScrollBarVisibility="Auto" IsReadOnly="True" 
-                     Height="Auto" TextWrapping="Wrap" Margin="0 10 5 5" Grid.Row="3" Grid.Column="0"/>
+                     Height="Auto" TextWrapping="Wrap" Margin="0 0 5 5" Grid.Row="3" Grid.Column="0"/>
 
             <TextBlock Text="Неисправно, если" FontWeight="Bold" Margin="0 10 0 5" Grid.Row="2" Grid.Column="1"/>
             <TextBox x:Name="measurementNotWorkingTextBox" VerticalScrollBarVisibility="Auto" IsReadOnly="True" 
-                     Height="Auto" TextWrapping="Wrap" Margin="0 10 5 5" Grid.Row="3" Grid.Column="1"/>
+                     Height="Auto" TextWrapping="Wrap" Margin="0 0 5 5" Grid.Row="3" Grid.Column="1"/>
 
-            <TextBlock Text="Solution:" FontWeight="Bold" Margin="0 10 0 5" Grid.Row="4"/>
+            <TextBlock Text="Решение" FontWeight="Bold" Margin="0 10 0 5" Grid.Row="4"/>
             <TextBox x:Name="solutionTextBox" VerticalScrollBarVisibility="Auto" IsReadOnly="True" 
-                     Height="Auto" TextWrapping="Wrap" Margin="0 10 5 5" Grid.Row="5" Grid.ColumnSpan="2"/>
+                     Height="Auto" TextWrapping="Wrap" Margin="0 0 5 5" Grid.Row="5" Grid.ColumnSpan="2"/>
         </Grid>
     </Grid>
 </Window>

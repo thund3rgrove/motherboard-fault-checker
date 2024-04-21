@@ -19,3 +19,4 @@ C:\Users\alex0\Desktop\образование\универ\КУРС 2\семес
 C:\Users\alex0\Desktop\образование\универ\КУРС 2\семестр 4\ЭВМ\TestProject\obj\Debug\net8.0-windows\ref\TestProject.dll
 C:\Users\alex0\Desktop\образование\универ\КУРС 2\семестр 4\ЭВМ\TestProject\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\alex0\Desktop\образование\универ\КУРС 2\семестр 4\ЭВМ\TestProject\obj\Debug\net8.0-windows\TestProject_MarkupCompile.lref
+C:\Users\alex0\Desktop\образование\универ\КУРС 2\семестр 4\ЭВМ\TestProject\obj\Debug\net8.0-windows\TestProject.sourcelink.json
