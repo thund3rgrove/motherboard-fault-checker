@@ -108,8 +108,10 @@ public partial class MainWindow : Window
         if (faultsListBox.SelectedItem != null)
         {
             Fault selectedFault = (Fault)faultsListBox.SelectedItem;
-            string faultDetails = $"Name: {selectedFault.Name}\n\nWorking: {selectedFault.Measurement.Working}\n\nNot working: {selectedFault.Measurement.NotWorking}\n\nSolution: {selectedFault.Solution}";
-            faultDetailsTextBlock.Text = faultDetails;
+            nameTextBox.Text = selectedFault.Name;
+            workingTextBox.Text = selectedFault.Measurement.Working;
+            notWorkingTextBox.Text = selectedFault.Measurement.NotWorking;
+            solutionTextBox.Text = selectedFault.Solution;
 
             faultsListBox.Visibility = Visibility.Collapsed;
             faultDetailsPanel.Visibility = Visibility.Visible;
@@ -313,7 +315,9 @@ public partial class MainWindow : Window
 
                 // Загружаем неисправности для выбранного компонента
                 faultsListBox.ItemsSource = component.Faults;
-
+                
+                BackButton_Click(null, null);
+                
                 // Выходим из цикла, так как уже нашли компонент
                 break;
             }

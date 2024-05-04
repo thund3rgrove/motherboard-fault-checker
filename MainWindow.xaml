@@ -1,7 +1,7 @@
 ﻿<Window x:Class="TestProject.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Faults Simulator" Height="450" Width="800">
+        Title="Faults Simulator" Width="1600" Height="900">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
@@ -9,17 +9,17 @@
         </Grid.ColumnDefinitions>
 
         <!-- Изображение -->
-        <Border BorderBrush="Black" BorderThickness="1">
+        <Border BorderBrush="CornflowerBlue" BorderThickness="1" Margin="10">
             <Image 
                 x:Name="motherboardImage" 
                 Source="C:\Users\alex0\Desktop\образование\универ\КУРС 2\семестр 4\ЭВМ\TestProject\Assets\Gigabyte B450M DS3H.png" 
                 Loaded="MotherboardImage_Loaded"
                 MouseLeftButtonDown="Image_MouseLeftButtonDown"
-                Margin="10"/>
+                />
         </Border>
 
         <!-- Список неисправностей -->
-        <ListBox x:Name="faultsListBox" Grid.Column="1" Margin="10" SelectionChanged="FaultsListBox_SelectionChanged">
+        <ListBox x:Name="faultsListBox" Grid.Column="1" Margin="10" SelectionChanged="FaultsListBox_SelectionChanged" FontSize="18">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <TextBlock Text="{Binding Name}"/>
@@ -29,8 +29,26 @@
 
         <!-- Панель с информацией о неисправности и кнопкой "Назад" -->
         <StackPanel x:Name="faultDetailsPanel" Grid.Column="1" Margin="10" Visibility="Collapsed">
-            <TextBlock x:Name="faultDetailsTextBlock" Margin="0 0 0 10"/>
+            <TextBlock Text="Fault Details" FontWeight="Bold" FontSize="24" Margin="0 0 0 10"/>
+            <StackPanel Margin="0 0 0 10">
+                <TextBlock Text="Name:" FontWeight="Bold" FontSize="18"/>
+                <TextBox x:Name="nameTextBox" Text="{Binding SelectedItem.Name, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Margin="0 0 0 10">
+                <TextBlock Text="Working:" FontWeight="Bold" FontSize="18"/>
+                <TextBox x:Name="workingTextBox" Text="{Binding SelectedItem.Measurement.Working, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Margin="0 0 0 10">
+                <TextBlock Text="Not working:" FontWeight="Bold" FontSize="18"/>
+                <TextBox x:Name="notWorkingTextBox" Text="{Binding SelectedItem.Measurement.NotWorking, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
+            </StackPanel>
+            <StackPanel Margin="0 0 0 10">
+                <TextBlock Text="Solution:" FontWeight="Bold" FontSize="18"/>
+                <TextBox x:Name="solutionTextBox" Text="{Binding SelectedItem.Solution, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
+            </StackPanel>
             <Button x:Name="backButton" Content="Назад" Click="BackButton_Click"/>
         </StackPanel>
+
+
     </Grid>
 </Window>
