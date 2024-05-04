@@ -12,7 +12,7 @@
         <Border BorderBrush="CornflowerBlue" BorderThickness="1" Margin="10">
             <Image 
                 x:Name="motherboardImage" 
-                Source="C:\Users\alex0\Desktop\образование\универ\КУРС 2\семестр 4\ЭВМ\TestProject\Assets\Gigabyte B450M DS3H.png" 
+                Source="Assets\Gigabyte B450M DS3H.png" 
                 Loaded="MotherboardImage_Loaded"
                 MouseLeftButtonDown="Image_MouseLeftButtonDown"
                 />

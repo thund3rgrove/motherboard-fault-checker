@@ -8,4 +8,12 @@
         <UseWPF>true</UseWPF>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Assets\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\Gigabyte B450M DS3H.png" />
+      <Resource Include="Assets\Gigabyte B450M DS3H.png" />
+    </ItemGroup>
 </Project>
