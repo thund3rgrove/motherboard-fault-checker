@@ -68,10 +68,10 @@
                 </Grid>
 
                 <StackPanel Grid.Row="1" x:Name="ConfirmationPanel" Margin="10" Visibility="Collapsed">
-                    <TextBlock Text="Is it working correctly?" />
+                    <TextBlock Text="Элемент работает исправно?" />
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Yes" Tag="yesBtn" Click="WorkingButton_Click" Margin="5" />
-                        <Button Content="No" Tag="noBtn" Click="WorkingButton_Click" Margin="5" />
+                        <Button Content="Да" Tag="yesBtn" Click="WorkingButton_Click" Margin="5" />
+                        <Button Content="Нет" Tag="noBtn" Click="WorkingButton_Click" Margin="5" />
                     </StackPanel>
                 </StackPanel>
             </Grid>
