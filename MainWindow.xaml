@@ -1,7 +1,8 @@
 ﻿<Window x:Class="TestProject.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Faults Simulator" Width="1600" Height="900">
+        Title="Faults Simulator" Width="1600" Height="900"
+        FontSize="16">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
@@ -25,11 +26,11 @@
 
                 <!-- Plain text out of radio btn -->
                 <RadioButton Content="Щуп на GND:" Focusable="False" IsHitTestVisible="False" />
-                <RadioButton Grid.Row="1" Content="Красный" GroupName="Dipstick" IsChecked="True" Grid.Column="0"
+                <RadioButton Grid.Row="1" Content="Красный" GroupName="Dipstick" Grid.Column="0"
                              Margin="5,0" Checked="RadioButton_Group_Checked" />
                 <Separator />
-                <RadioButton Grid.Row="1" Content="Черный" GroupName="Dipstick" Grid.Column="1" Margin="5,0"
-                             Checked="RadioButton_Group_Checked" />
+                <RadioButton Grid.Row="1" Content="Черный" GroupName="Dipstick" IsChecked="True" Grid.Column="1"
+                             Margin="5,0" Checked="RadioButton_Group_Checked" />
             </ToolBar.Items>
         </ToolBar>
 
@@ -45,11 +46,10 @@
                     <Image
                         x:Name="motherboardImage"
                         Source="Assets\Gigabyte B450M DS3H.png"
-                        Loaded="MotherboardImage_Loaded"
-                        MouseLeftButtonDown="Image_MouseLeftButtonDown" />
+                        Loaded="MotherboardImage_Loaded" />
+                    <!-- TODO: delete in future builds: MouseLeftButtonDown="Image_MouseLeftButtonDown" -->
 
-                    <Canvas x:Name="pinsCanvas" />
-                    <Canvas x:Name="usbCanvas" />
+                    <Canvas x:Name="ElementsCanvas" />
                 </Grid>
             </Border>
 
@@ -67,7 +67,7 @@
                     <Image x:Name="OscillographPlainImage" Source="Assets\No-Wave.png" Visibility="Collapsed" />
                 </Grid>
 
-                <StackPanel Grid.Row="1" x:Name="ConfirmationPanel" Margin="10" Visibility="Visible"> <!--Visibility: Collapsed-->
+                <StackPanel Grid.Row="1" x:Name="ConfirmationPanel" Margin="10" Visibility="Collapsed">
                     <TextBlock Text="Is it working correctly?" />
                     <StackPanel Orientation="Horizontal">
                         <Button Content="Yes" Tag="yesBtn" Click="WorkingButton_Click" Margin="5" />

@@ -1,14 +1,13 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace TestProject;
 
 public partial class MainWindow : Window
 {
-    private static readonly Random random = new();
+    private static readonly Random Rnd = new();
 
-    private static readonly Dictionary<string, Measurement[]> standardValues = new()
+    private static readonly Dictionary<string, Measurement[]> StandardValues = new()
     {
         {
             "+12V", new Measurement[]
@@ -34,7 +33,7 @@ public partial class MainWindow : Window
         {
             "M_BIOS", new Measurement[]
             {
-                new("Осциллограф", 1, random.NextInt64(0, 2)) // 0, 1 as bool
+                new("Осциллограф", 1, Rnd.NextInt64(0, 2)) // 0, 1 as bool
             }
         },
         {
@@ -46,31 +45,43 @@ public partial class MainWindow : Window
         }
     };
 
-    private readonly Dictionary<string, Measurement> measurementMap = new();
+    // TODO: delete in future builds
+    // private List<Component> components = new();
+    // TODO: end
 
-    private List<Component> components = new();
-
-    private string currentElement;
-    private string groundColor;
+    private string currentElement = string.Empty;
+    private string groundColor = string.Empty;
 
     public MainWindow()
     {
         InitializeComponent();
+
+        foreach (UIElement element in toolbar.Items)
+        {
+            if (element is not RadioButton { IsChecked: true } radioButton) continue;
+            groundColor = radioButton.Content?.ToString() ?? string.Empty;
+            Console.WriteLine($"GND is set to {groundColor}");
+            break; // Exit loop once checked radio button is found
+        }
     }
 
     private static double GenerateRandomDouble(double minValue, double maxValue)
     {
-        return minValue + random.NextDouble() * (maxValue - minValue);
+        return minValue + Rnd.NextDouble() * (maxValue - minValue);
     }
 
     private void MotherboardImage_Loaded(object sender, RoutedEventArgs e)
     {
-        InitializeComponents();
+        // TODO: delete in future builds
+        // InitializeComponents();
+        // TODO: end
         InitializePins();
         InitializeUSBPort();
         InitializeBIOS();
     }
 
+    // TODO: delete in future builds
+    /*
     private void InitializeComponents()
     {
         var imageWidth = motherboardImage.ActualWidth;
@@ -134,6 +145,8 @@ public partial class MainWindow : Window
             )
         };
     }
+    */
+    // TODO: end
 
     private void InitializePins()
     {
@@ -154,7 +167,8 @@ public partial class MainWindow : Window
         btn.Click += BtnVoltage_Click;
         Canvas.SetLeft(btn, motherboardImage.ActualWidth * leftRatio);
         Canvas.SetTop(btn, motherboardImage.ActualHeight * topRatio);
-        pinsCanvas.Children.Add(btn);
+        btn.FontSize = 13;
+        ElementsCanvas.Children.Add(btn);
     }
 
     private void InitializeUSBPort()
@@ -162,15 +176,16 @@ public partial class MainWindow : Window
         var usb = new Button
         {
             Content = "USB_DATA",
-            Width = 50,
+            Width = 60,
             Height = 30,
             Tag = "USB_DATA"
         };
 
         usb.Click += USBPortButton_Click;
-        Canvas.SetLeft(usb, motherboardImage.ActualWidth * 0.07);
+        Canvas.SetLeft(usb, motherboardImage.ActualWidth * 0.06);
         Canvas.SetTop(usb, motherboardImage.ActualHeight * 0.36);
-        usbCanvas.Children.Add(usb);
+        usb.FontSize = 13;
+        ElementsCanvas.Children.Add(usb);
     }
 
     private void InitializeBIOS()
@@ -186,7 +201,8 @@ public partial class MainWindow : Window
         btn.Click += BiosClick;
         Canvas.SetLeft(btn, motherboardImage.ActualWidth * 0.35);
         Canvas.SetTop(btn, motherboardImage.ActualHeight * 0.57);
-        usbCanvas.Children.Add(btn);
+        btn.FontSize = 12;
+        ElementsCanvas.Children.Add(btn);
     }
 
     private void BtnVoltage_Click(object sender, RoutedEventArgs e)
@@ -229,13 +245,14 @@ public partial class MainWindow : Window
 
     private void HandleMeasurement(string element)
     {
-        if (standardValues.ContainsKey(element))
+        if (StandardValues.ContainsKey(element))
         {
-            var measurements = standardValues[element];
+            var measurements = StandardValues[element];
             var selectedTool = GetSelectedTool();
 
             foreach (var measurement in measurements)
             {
+                ConfirmationPanel.Visibility = Visibility.Visible;
                 OscillographSineImage.Visibility = Visibility.Collapsed;
                 OscillographPlainImage.Visibility = Visibility.Collapsed;
 
@@ -300,7 +317,9 @@ public partial class MainWindow : Window
         }
     }
 
-    private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+    // TODO: delete in future builds
+    /*
+     private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         // Получаем позицию клика относительно изображения
         var position = e.GetPosition(motherboardImage);
@@ -321,6 +340,8 @@ public partial class MainWindow : Window
                 break;
             }
     }
+    */
+    // TODO: end
 
     public static string AdjustVoltage(double value)
     {
@@ -347,10 +368,8 @@ public partial class MainWindow : Window
         // Check if the value is larger than or equal to the millivolt threshold
 
         if (Math.Abs(value) >= mVThreshold)
-        {
             // Format the value in volts to 3 decimal places and append 'V'
             return $"{value:F2} V"; // Format to 2 decimal places and append 'V'
-        }
 
         // Convert the value to millivolts and format it to 3 decimal places
         var voltageInMillivolts = value * 1e3;
@@ -358,10 +377,14 @@ public partial class MainWindow : Window
     }
 
 
+    // TODO: delete in future builds
+    /*
     private void MeasureComponent(Component component)
     {
         Console.WriteLine($"Выполнены измерения для компонента: {component.Name}");
     }
+    */
+    // TODO: end
 
     private void RadioButton_Group_Checked(object sender, RoutedEventArgs e)
     {
@@ -393,18 +416,22 @@ public partial class MainWindow : Window
         var btn = (Button)sender;
         var isYesClicked = btn.Tag.ToString() == "yesBtn" ? true : false;
 
-        if (standardValues.ContainsKey(currentElement))
+        if (StandardValues.ContainsKey(currentElement))
         {
-            var measurements = standardValues[currentElement];
+            var measurements = StandardValues[currentElement];
             foreach (var measurement in measurements)
-                // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if dont want to allow making diagnosis without choosing correct tool
+                // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if don't want to allow making diagnosis without choosing correct tool
                 switch (measurement.Instrument)
                 {
                     case "Осциллограф":
-                        if (measurement.StandardValue == measurement.GeneratedValue)
-                            ShowResultMessage("BIOS is working correctly.", "Верно!", "Неверно!", isYesClicked);
-                        else
-                            ShowResultMessage("BIOS is not working correctly.", "Неверно!", "Верно!", isYesClicked);
+                        if (currentElement == "M_BIOS")
+                        {
+                            if (measurement.StandardValue == measurement.GeneratedValue)
+                                ShowResultMessage("BIOS исправна.", "Верно", "Неверно", isYesClicked);
+                            else
+                                ShowResultMessage("Неисправна микросхема BIOS, либо повреждена (стерта) прошивка",
+                                    "Неверно", "Верно", isYesClicked);
+                        }
 
                         return;
 
