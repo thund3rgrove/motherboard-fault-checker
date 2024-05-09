@@ -10,38 +10,33 @@ public partial class MainWindow : Window
     private static readonly Dictionary<string, Measurement[]> StandardValues = new()
     {
         {
-            "+12V", new Measurement[]
-            {
+            "+12V", [
                 new("Вольтметр", 12, GenerateRandomDouble(11, 13)),
                 new("Омметр", 12000, GenerateRandomDouble(11000, 13000))
-            }
+            ]
         },
         {
-            "+3.3V", new Measurement[]
-            {
+            "+3.3V", [
                 new("Вольтметр", 3.3, GenerateRandomDouble(3.0, 3.6)),
                 new("Омметр", 3300, GenerateRandomDouble(3000, 3600))
-            }
+            ]
         },
         {
-            "+5V", new Measurement[]
-            {
+            "+5V", [
                 new("Вольтметр", 5, GenerateRandomDouble(4.8, 5.2)),
                 new("Омметр", 5000, GenerateRandomDouble(4800, 5200))
-            }
+            ]
         },
         {
-            "M_BIOS", new Measurement[]
-            {
+            "M_BIOS", [
                 new("Осциллограф", 1, Rnd.NextInt64(0, 2)) // 0, 1 as bool
-            }
+            ]
         },
         {
-            "USB_DATA", new Measurement[]
-            {
+            "USB_DATA", [
                 new("Вольтметр", 0.575 / 1000, GenerateRandomDouble(0.150 / 1000.0, 1.0 / 1000.0)),
                 new("Омметр", 1000, GenerateRandomDouble(900, 1100))
-            }
+            ]
         }
     };
 
@@ -76,8 +71,8 @@ public partial class MainWindow : Window
         // InitializeComponents();
         // TODO: end
         InitializePins();
-        InitializeUSBPort();
-        InitializeBIOS();
+        InitializeUsbPort();
+        InitializeBios();
     }
 
     // TODO: delete in future builds
@@ -171,7 +166,7 @@ public partial class MainWindow : Window
         ElementsCanvas.Children.Add(btn);
     }
 
-    private void InitializeUSBPort()
+    private void InitializeUsbPort()
     {
         var usb = new Button
         {
@@ -188,7 +183,7 @@ public partial class MainWindow : Window
         ElementsCanvas.Children.Add(usb);
     }
 
-    private void InitializeBIOS()
+    private void InitializeBios()
     {
         var btn = new Button
         {
@@ -284,7 +279,7 @@ public partial class MainWindow : Window
                             break;
                         case "Осциллограф":
                             string signal;
-                            if (measurement.GeneratedValue == 1)
+                            if ((int)measurement.GeneratedValue == 1)
                             {
                                 signal = "Синусоидальный сигнал";
                                 OscillographSineImage.Visibility = Visibility.Visible;
@@ -346,12 +341,12 @@ public partial class MainWindow : Window
     public static string AdjustVoltage(double value)
     {
         // Define the threshold values for switching between units
-        var kThreshold = 1e6; // 1 MV (Megavolt)
-        var VThreshold = 1e3; // 1 kV (Kilovolt)
+        var MThreshold = 1e6; // 1 MV (Megavolt)
+        var kThreshold = 1e3; // 1 kV (Kilovolt)
         double mVThreshold = 1; // 1 V (Volt)
 
         // Check if the value is larger than or equal to the kilovolt threshold
-        if (Math.Abs(value) >= kThreshold)
+        if (Math.Abs(value) >= MThreshold)
         {
             // Convert the value to megavolts and format it to 3 decimal places
             var voltageInMegavolts = value / 1e6;
@@ -359,7 +354,7 @@ public partial class MainWindow : Window
         }
         // Check if the value is larger than or equal to the volt threshold
 
-        if (Math.Abs(value) >= VThreshold)
+        if (Math.Abs(value) >= kThreshold)
         {
             // Convert the value to kilovolts and format it to 3 decimal places
             var voltageInKilovolts = value / 1e3;
@@ -414,7 +409,7 @@ public partial class MainWindow : Window
         }
 
         var btn = (Button)sender;
-        var isYesClicked = btn.Tag.ToString() == "yesBtn" ? true : false;
+        var isYesClicked = btn.Tag.ToString() == "yesBtn";
 
         if (StandardValues.ContainsKey(currentElement))
         {
@@ -478,6 +473,8 @@ public partial class MainWindow : Window
     }
 }
 
+// TODO: delete in future builds
+/*
 public class Component
 {
     public Component(string name, Rect area)
@@ -489,6 +486,8 @@ public class Component
     public string Name { get; set; }
     public Rect Area { get; set; }
 }
+*/
+// TODO: end
 
 public class Measurement
 {
