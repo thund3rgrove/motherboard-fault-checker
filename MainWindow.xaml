@@ -3,52 +3,78 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Faults Simulator" Width="1600" Height="900">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <!-- Изображение -->
-        <Border BorderBrush="CornflowerBlue" BorderThickness="1" Margin="10">
-            <Image 
-                x:Name="motherboardImage" 
-                Source="Assets\Gigabyte B450M DS3H.png" 
-                Loaded="MotherboardImage_Loaded"
-                MouseLeftButtonDown="Image_MouseLeftButtonDown"
-                />
-        </Border>
+        <!-- Tools Pane -->
+        <ToolBar Grid.Row="0" x:Name="toolbar">
+            <ToolBar.Items>
+                <RadioButton Content="Омметр" GroupName="Tools" />
+                <Separator />
+                <RadioButton Content="Вольтметр" GroupName="Tools" />
+                <Separator />
+                <RadioButton Content="Амперметр" GroupName="Tools" />
+                <Separator />
+                <RadioButton Content="Осциллограф" GroupName="Tools" />
+                <Separator />
+                <RadioButton Content="PCIe tester" GroupName="Tools" />
+                <Separator />
+                <Separator />
 
-        <!-- Список неисправностей -->
-        <ListBox x:Name="faultsListBox" Grid.Column="1" Margin="10" SelectionChanged="FaultsListBox_SelectionChanged" FontSize="18">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <TextBlock Text="{Binding Name}"/>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+                <!-- Plain text out of radio btn -->
+                <RadioButton Content="Щуп на GND:" Focusable="False" IsHitTestVisible="False" />
+                <RadioButton Grid.Row="1" Content="Красный" GroupName="Dipstick" IsChecked="True" Grid.Column="0"
+                             Margin="5,0" Checked="RadioButton_Group_Checked" />
+                <Separator />
+                <RadioButton Grid.Row="1" Content="Черный" GroupName="Dipstick" Grid.Column="1" Margin="5,0"
+                             Checked="RadioButton_Group_Checked" />
+            </ToolBar.Items>
+        </ToolBar>
 
-        <!-- Панель с информацией о неисправности и кнопкой "Назад" -->
-        <StackPanel x:Name="faultDetailsPanel" Grid.Column="1" Margin="10" Visibility="Collapsed">
-            <TextBlock Text="Fault Details" FontWeight="Bold" FontSize="24" Margin="0 0 0 10"/>
-            <StackPanel Margin="0 0 0 10">
-                <TextBlock Text="Name:" FontWeight="Bold" FontSize="18"/>
-                <TextBox x:Name="nameTextBox" Text="{Binding SelectedItem.Name, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
-            </StackPanel>
-            <StackPanel Margin="0 0 0 10">
-                <TextBlock Text="Working:" FontWeight="Bold" FontSize="18"/>
-                <TextBox x:Name="workingTextBox" Text="{Binding SelectedItem.Measurement.Working, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
-            </StackPanel>
-            <StackPanel Margin="0 0 0 10">
-                <TextBlock Text="Not working:" FontWeight="Bold" FontSize="18"/>
-                <TextBox x:Name="notWorkingTextBox" Text="{Binding SelectedItem.Measurement.NotWorking, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
-            </StackPanel>
-            <StackPanel Margin="0 0 0 10">
-                <TextBlock Text="Solution:" FontWeight="Bold" FontSize="18"/>
-                <TextBox x:Name="solutionTextBox" Text="{Binding SelectedItem.Solution, ElementName=faultsListBox}" IsReadOnly="True" FontSize="18" TextWrapping="Wrap"/>
-            </StackPanel>
-            <Button x:Name="backButton" Content="Назад" Click="BackButton_Click"/>
-        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
+            <!-- Изображение -->
+            <Border Grid.Column="0" BorderBrush="CornflowerBlue" BorderThickness="1" Margin="10">
+                <Grid>
+                    <Image
+                        x:Name="motherboardImage"
+                        Source="Assets\Gigabyte B450M DS3H.png"
+                        Loaded="MotherboardImage_Loaded"
+                        MouseLeftButtonDown="Image_MouseLeftButtonDown" />
 
+                    <Canvas x:Name="pinsCanvas" />
+                    <Canvas x:Name="usbCanvas" />
+                </Grid>
+            </Border>
+
+            <!-- Список неисправностей -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                
+                <Grid Grid.Row="0">
+                    <TextBlock x:Name="GndDipstick" Text="" />
+                    <TextBlock x:Name="MeasurementText" Margin="10" Grid.Column="0" />
+                    <Image x:Name="OscillographSineImage" Source="Assets\Sine-Wave.png" Visibility="Collapsed" />
+                    <Image x:Name="OscillographPlainImage" Source="Assets\No-Wave.png" Visibility="Collapsed" />
+                </Grid>
+                
+                <StackPanel Grid.Row="1" x:Name="ConfirmationPanel" Margin="10" Visibility="Visible"> <!--Visibility: Collapsed-->
+                    <TextBlock Text="Is it working correctly?" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Yes" Tag="yesBtn" Click="WorkingButton_Click" Margin="5"/>
+                        <Button Content="No" Tag="noBtn" Click="WorkingButton_Click" Margin="5"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </Grid>
     </Grid>
 </Window>

@@ -9,11 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Assets\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Remove="Assets\Gigabyte B450M DS3H.png" />
-      <Resource Include="Assets\Gigabyte B450M DS3H.png" />
+        <None Remove="Assets\Gigabyte B450M DS3H.png"/>
+        <Resource Include="Assets\Gigabyte B450M DS3H.png"/>
+        <None Remove="Assets\Sine-Wave.png" />
+        <Resource Include="Assets\Sine-Wave.png" />
+        <None Remove="Assets\52f3db57ce395fe72e8b456d.png" />
+        <Resource Include="Assets\No-Wave.png" />
     </ItemGroup>
 </Project>

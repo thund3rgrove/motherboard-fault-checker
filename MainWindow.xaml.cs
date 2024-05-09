@@ -1,366 +1,405 @@
-﻿using System.Collections.ObjectModel;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace TestProject;
 
-/// <summary>
-///     Interaction logic for MainWindow.xaml
-/// </summary>
 public partial class MainWindow : Window
 {
-    private List<Component> components;
+    private static readonly Random random = new();
+
+    private string currentElement;
+
+    private static readonly Dictionary<string, Measurement[]> standardValues = new()
+    {
+        {
+            "+12V", new Measurement[]
+            {
+                new("Вольтметр", 12, GenerateRandomDouble(11, 13)),
+                new("Омметр", 12000, GenerateRandomDouble(11000, 13000))
+            }
+        },
+        {
+            "+3.3V", new Measurement[]
+            {
+                new("Вольтметр", 3.3, GenerateRandomDouble(3.0, 3.6)),
+                new("Омметр", 3300, GenerateRandomDouble(3000, 3600))
+            }
+        },
+        {
+            "+5V", new Measurement[]
+            {
+                new("Вольтметр", 5, GenerateRandomDouble(4.8, 5.2)),
+                new("Омметр", 5000, GenerateRandomDouble(4800, 5200))
+            }
+        },
+        {
+            "M_BIOS", new Measurement[]
+            {
+                new("Осциллограф", 1, random.NextInt64(0, 2)) // 0, 1 as bool
+            }
+        }
+    };
+
+    private List<Component> components = new();
+    private string groundColor;
+    private readonly Dictionary<string, Measurement> measurementMap = new();
 
     public MainWindow()
     {
         InitializeComponent();
-        LoadData();
-        // PopulateFaultGroupsTreeView();
-        // InitializeComponents();
     }
 
-    public ObservableCollection<FaultGroup> FaultGroups { get; set; }
-
-    private void LoadData()
+    private static double GenerateRandomDouble(double minValue, double maxValue)
     {
-        // Создаем список групп неисправностей
-        FaultGroups = new ObservableCollection<FaultGroup>
-        {
-            new(
-                "Система не стартует",
-                new ObservableCollection<Fault>
-                {
-                    new(
-                        "Короткое замыкание на линиях +12В, +5В, +3.3В.",
-                        new Measurement("Между клеммами GND и выбранной линией питания Омметр показывает килоомы",
-                            "Система не стартует, может сильно нагреваться вышедший из строя компонент или микросхема. Показатели Омметра близки к 0"),
-                        "Решение: выполнить поиск неисправного элемента используя схему последовательного запуска и формирования определенных сигналов на контрольных точках. (Требуется Service Manual)."
-                    ),
-                    new(
-                        "Неисправен южный мост",
-                        new Measurement(
-                            "В режиме измерения падения напряжения установить красный щуп на GND, а черным пройтись по линиям D- D+ всех USB портов, показатели не должны сильно отличаться (не более чем на десятки мВ) и находиться в примерном диапазоне от 0.450мВ до 0.7мВ",
-                            "Показатели отличаются на сотни мВ или равны 0, либо есть КЗ между линиями D+ и D-"),
-                        "Решение: Замена южного моста."
-                    ),
-                    new(
-                        "Неисправность микросхемы BIOS, либо ее прошивки",
-                        new Measurement(
-                            "При помощи осциллографа можно увидеть сигналы (импульсы) на ножках input/output микросхемы bios, означающие обмен данными с П.У.",
-                            "Отсутствуют сигналы (импульсы) на ножках input/output микросхемы bios, означающие обмен данными с П.У. отсутствует сигнал CS. Проверка осуществляется осциллографом"),
-                        "Решение: Перепрошивка микросхемы BIOS, либо замена в случае ее неисправности."
-                    ),
-                    new(
-                        "Неисправность RTC",
-                        new Measurement(
-                            "На часовом кварцевом резонаторе можно наблюдать осциллограмму в виде синусоиды с частотой 32768Гц",
-                            "Отсутствие осциллограммы, либо несинусоидальная форма, либо неправильная частота. "),
-                        "Решение: Перепайка кварцевого резонатора, поиск неисправности в системе питания, замена южного моста (после дополнительной диагностики)."
-                    )
-                }
-            ),
-            new(
-                "Система стартует, но нет изображения",
-                new ObservableCollection<Fault>
-                {
-                    new(
-                        "Проблемы с разъемом видеокарты, либо линиями передачи данных",
-                        new Measurement(
-                            "Картинку можно увидеть на мониторе, все линии разъема видеокарты проверяются специальным тестером на обрыв",
-                            "Есть обрыв в линиях передачи данных и это видно на тестере разъема видеокарты"),
-                        "Решение: выполнить восстановление линий передачи данных, заменить разъем видеокарты."
-                    )
-                }
-            ),
-            new(
-                "Дополнительные неисправности",
-                new ObservableCollection<Fault>
-                {
-                    new(
-                        "1. Проблемы с базовым генератором тактовой частоты или его кварцевым резонатором",
-                        new Measurement("Норма: Частота 14.3МГц присутствует",
-                            "Проверьте наличие частоты 14.3МГц на базовом генераторе тактовой частоты или его кварцевом резонаторе"),
-                        "Замените базовый генератор тактовой частоты или его кварцевый резонатор."
-                    ),
-                    new(
-                        "2. Нет звука или система не стартует из-за неисправного микроконтроллера звукового ядра",
-                        new Measurement("Норма: Частота 25МГц присутствует",
-                            "Проверьте наличие частоты 25МГц на микроконтроллере звукового ядра"),
-                        "Замените микроконтроллер звукового ядра."
-                    ),
-                    new(
-                        "3. Система не стартует из-за неисправного микроконтроллера SIO/MIO",
-                        new Measurement("Норма: Система стартует после проверки мк. SIO/MIO",
-                            "Проверьте последовательность запуска и сигналы на контрольных точках микроконтроллера SIO/MIO"),
-                        "Замените микроконтроллер SIO/MIO."
-                    )
-                }
-            )
-        };
-
-        // Устанавливаем источник данных для TreeView
-        // faultsTreeView.ItemsSource = FaultGroups;
+        return minValue + random.NextDouble() * (maxValue - minValue);
     }
-
-    private void FaultsListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
-    {
-        if (faultsListBox.SelectedItem != null)
-        {
-            Fault selectedFault = (Fault)faultsListBox.SelectedItem;
-            nameTextBox.Text = selectedFault.Name;
-            workingTextBox.Text = selectedFault.Measurement.Working;
-            notWorkingTextBox.Text = selectedFault.Measurement.NotWorking;
-            solutionTextBox.Text = selectedFault.Solution;
-
-            faultsListBox.Visibility = Visibility.Collapsed;
-            faultDetailsPanel.Visibility = Visibility.Visible;
-        }
-    }
-
-    private void BackButton_Click(object sender, RoutedEventArgs e)
-    {
-        faultsListBox.SelectedItem = null;
-
-        faultsListBox.Visibility = Visibility.Visible;
-        faultDetailsPanel.Visibility = Visibility.Collapsed;
-    }
-
 
     private void MotherboardImage_Loaded(object sender, RoutedEventArgs e)
     {
-        // Используем полученные размеры для инициализации компонентов
         InitializeComponents();
+        InitializePins();
+        InitializeUSBPort();
+        InitializeBIOS();
     }
-    
-    public Rect ScaleCoordinates(Rect originalRect, double originalWidth, double originalHeight, double newWidth, double newHeight)
-    {
-        double scaleX = newWidth / originalWidth;
-        double scaleY = newHeight / originalHeight;
 
-        double newX = originalRect.X * scaleX;
-        double newY = originalRect.Y * scaleY;
-
-        return new Rect(newX, newY, originalRect.Width * scaleX, originalRect.Height * scaleY);
-    }
-    
     private void InitializeComponents()
     {
-        double imageWidth = motherboardImage.ActualWidth;
-        double imageHeight = motherboardImage.ActualHeight;
+        var imageWidth = motherboardImage.ActualWidth;
+        var imageHeight = motherboardImage.ActualHeight;
 
         // Размеры картинки
         Console.WriteLine($"Image width: {imageWidth}, Image height: {imageHeight}");
-        
-        double originalWidth = 349.5058400718778;
+
+        var originalWidth = 349.5058400718778;
         double originalHeight = 389;
 
         components = new List<Component>
         {
-            new Component("CPU/Северный мост", 
-                ScaleCoordinates(new Rect(
-                    new Point(139, 106), new Point(210, 166)), 
-                    originalWidth, originalHeight, 
-                    motherboardImage.ActualWidth, motherboardImage.ActualHeight)
-                ),
-            new Component("ОЗУ", 
-                ScaleCoordinates(new Rect(
-                    new Point(248, 38), new Point(295, 235)), 
-                    originalWidth, originalHeight, 
-                    motherboardImage.ActualWidth, motherboardImage.ActualHeight)
-                ),
-            new Component("Слот PCIe", 
-                ScaleCoordinates(new Rect(
-                    new Point(83, 280), new Point(211, 290)), 
-                    originalWidth, originalHeight, 
-                    motherboardImage.ActualWidth, motherboardImage.ActualHeight)
-                ),
-            new Component("Слот PCIe", 
-                ScaleCoordinates(new Rect(
-                    new Point(83, 340), new Point(211, 349)), 
-                    originalWidth, originalHeight, 
-                    motherboardImage.ActualWidth, motherboardImage.ActualHeight)
-                ),
-            new Component("Южный мост/Чипсет", 
-                ScaleCoordinates(new Rect(
-                    new Point(246, 290), new Point(296, 340)), 
-                    originalWidth, originalHeight, 
-                    motherboardImage.ActualWidth, motherboardImage.ActualHeight)
-                ),
-            
-            new Component("Батарейка CMOS", 
-                ScaleCoordinates(new Rect(
-                    new Point(131, 298), new Point(160, 327)), 
-                    originalWidth, originalHeight, 
-                    motherboardImage.ActualWidth, motherboardImage.ActualHeight)),
+            new("CPU/Северный мост",
+                new Rect(
+                    imageWidth * 0.3977043701799486, // Relative X
+                    imageHeight * 0.2724935732647815, // Relative Y
+                    imageWidth * 0.20314395886889458, // Relative Width
+                    imageHeight * 0.15424164524421596 // Relative Height
+                )
+            ),
+            new("ОЗУ",
+                new Rect(
+                    imageWidth * 0.7095732647814911, // Relative X
+                    imageHeight * 0.09768637532133678, // Relative Y
+                    imageWidth * 0.13447557840616967, // Relative Width
+                    imageHeight * 0.5064267352185091 // Relative Height
+                )
+            ),
+            new("Слот PCIe",
+                new Rect(
+                    imageWidth * 0.23747814910025708, // Relative X
+                    imageHeight * 0.7197943444730077, // Relative Y
+                    imageWidth * 0.3662313624678663, // Relative Width
+                    imageHeight * 0.025706940874035994 // Relative Height
+                )
+            ),
+            new("Слот PCIe",
+                new Rect(
+                    imageWidth * 0.23747814910025708, // Relative X
+                    imageHeight * 0.8740359897172237, // Relative Y
+                    imageWidth * 0.3662313624678663, // Relative Width
+                    imageHeight * 0.02313624678663239 // Relative Height
+                )
+            ),
+            new("Южный мост/Чипсет",
+                new Rect(
+                    imageWidth * 0.7038508997429306, // Relative X
+                    imageHeight * 0.7455012853470437, // Relative Y
+                    imageWidth * 0.1430591259640103, // Relative Width
+                    imageHeight * 0.12853470437017997 // Relative Height
+                )
+            ),
+            new("Батарейка CMOS",
+                new Rect(
+                    imageWidth * 0.37481491002570694, // Relative X
+                    imageHeight * 0.7660668380462725, // Relative Y
+                    imageWidth * 0.08297429305912596, // Relative Width
+                    imageHeight * 0.07455012853470437 // Relative Height
+                )
+            )
         };
-
-        
-        // Добавление неисправностей к компонентам
-        components[0].AddFault(
-            "CPU | Проблемы с теплопроводностью",
-            "Температура в пределах нормы",
-            "Температура слишком высока",
-            "Применить новый слой теплопроводящей пасты (термопасты, жидкого металла)"
-        );
-        components[0].AddFault(
-            "CPU | Проблемы с питанием",
-            "Напряжение питания в пределах нормы",
-            "Напряжение питания слишком низкое",
-            "Проверить и, если необходимо, заменить блок питания"
-        );
-
-        components[1].AddFault(
-            "ОЗУ | Проблемы с контактами",
-            "Все контакты в исправном состоянии",
-            "Контакты загрязнены или повреждены",
-            "Очистить контакты или заменить планки памяти"
-        );
-        
-        components[1].AddFault(
-            "ОЗУ | Проблемы с напряжением питания",
-            "Напряжение питания в пределах нормы",
-            "Напряжение питания слишком высоко (>1.6V)",
-            "Проверить и, если необходимо, заменить модули памяти"
-        );
-
-        components[2].AddFault(
-            "Слот PCIe | Проблемы с сигналами",
-            "Сигналы на линиях PCIe в пределах нормы",
-            "Отсутствие сигналов на линиях PCIe",
-            "Проверить и, если необходимо, заменить PCIe контроллер или карту расширения"
-        );
-        
-        components[2].AddFault(
-            "Слот PCIe | Проблемы с механическими повреждениями",
-            "Нет видимых повреждений",
-            "Есть видимые повреждения или изгибы",
-            "Проверить и, если необходимо, заменить слот или контакты PCIe"
-        );
-        
-        foreach(Fault f in components[2].Faults)
-        {
-            components[3].AddFault(f.Name, f.Measurement.Working, f.Measurement.NotWorking, f.Solution);
-        }
-        
-        components[4].AddFault(
-            "Южный мост/Чипсет | Отсутствие сигналов на южном мосту",
-            "Все сигналы на южном мосту работают исправно",
-            "Отсутствие сигналов на южном мосту может привести к неработоспособности различных подсистем",
-            "Проверить и, если необходимо, заменить южный мост"
-        );
-
-        components[4].AddFault(
-            "Южный мост/Чипсет | Проблемы с интерфейсами устройств на южном мосту",
-            "Все интерфейсы устройств на южном мосту работают исправно",
-            "Неработоспособность интерфейсов устройств на южном мосту может привести к отсутствию связи с периферийными устройствами",
-            "Проверить и, если необходимо, заменить южный мост"
-        );
-
-        components[4].AddFault(
-            "Южный мост/Чипсет | Проблемы с управлением питанием на южном мосту",
-            "Управление питанием на южном мосту работает исправно",
-            "Неработоспособность управления питанием на южном мосту может привести к проблемам с питанием периферийных устройств",
-            "Проверить и, если необходимо, заменить южный мост"
-        );
-        
-        components[0].AddFault(
-            "Северный мост | Не запускается система",
-            "Компьютер успешно запускается и работает.",
-            "При нажатии на кнопку питания компьютер не запускается и не происходит никакой реакции.",
-            "1. Проверьте подключение всех кабелей и проводов к материнской плате.\n2. Попробуйте сбросить настройки BIOS.\n3. Проверьте и, если необходимо, замените батарейку BIOS.");
-        components[0].AddFault(
-            "Северный мост | Периодические перезагрузки",
-            "Компьютер работает стабильно и не перезагружается.",
-            "Компьютер периодически перезагружается или выключается сам по себе.",
-            "1. Проверьте температуру компонентов. Возможно, перегрев вызывает перезагрузки.\n2. Проведите диагностику оперативной памяти и жесткого диска.\n3. Проверьте наличие вирусов и малвари на компьютере.");
-        components[0].AddFault(
-            "Северный мост | Проблемы с портами",
-            "Порты на материнской плате работают нормально.",
-            "Порты USB или другие порты на материнской плате перестали работать или работают с ошибками.",
-            "1. Проверьте подключение устройств к портам.\n2. Попробуйте обновить драйвера для портов.\n3. Возможно, требуется замена портов или самой материнской платы.");
-        components[0].AddFault(
-            "Северный мост | Проблемы с видеокартой",
-            "Видеокарта функционирует нормально.",
-            "Вывод на монитор или работа графической карты вызывают проблемы.",
-            "1. Проверьте правильность подключения видеокарты к материнской плате.\n2. Попробуйте обновить драйвера для видеокарты.\n3. Проведите диагностику видеокарты.");
-        components[0].AddFault(
-            "Северный мост | Проблемы с оперативной памятью",
-            "Оперативная память работает без ошибок.",
-            "Компьютер не видит или не распознает всю установленную оперативную память.",
-            "1. Проверьте правильность установки оперативной памяти.\n2. Попробуйте переставить планки памяти в другие слоты.\n3. Возможно, одна из планок памяти или слот на материнской плате неисправны.");
-        
-        components[5].AddFault(
-            "Батарейка CMOS | Разряд или протечка батарейки CMOS", 
-            "Компьютерное время, дата и настройки BIOS сохраняются при каждой перезагрузке компьютера", 
-            "Компьютерное время, дата и настройки BIOS сбрасываются при каждой перезагрузке компьютера", 
-            "Замените батарейку CMOS на новую");
     }
 
+    private void InitializePins()
+    {
+        AddVoltageButton("+3.3V", 0.9, 0.38, "3.3");
+        AddVoltageButton("+5V", 0.9, 0.31, "5");
+        AddVoltageButton("+12V", 0.9, 0.25, "12");
+    }
+
+    private void AddVoltageButton(string content, double leftRatio, double topRatio, string voltage)
+    {
+        var btn = new Button
+        {
+            Content = content,
+            Width = 50,
+            Height = 30,
+            Tag = $"{voltage}V"
+        };
+        btn.Click += BtnVoltage_Click;
+        Canvas.SetLeft(btn, motherboardImage.ActualWidth * leftRatio);
+        Canvas.SetTop(btn, motherboardImage.ActualHeight * topRatio);
+        pinsCanvas.Children.Add(btn);
+    }
+
+    private void InitializeUSBPort()
+    {
+        var usb = new Button
+        {
+            Content = "USB_DATA",
+            Width = 50,
+            Height = 30,
+            Tag = "USB_DATA"
+        };
+
+        usb.Click += USBPortButton_Click;
+        Canvas.SetLeft(usb, motherboardImage.ActualWidth * 0.07);
+        Canvas.SetTop(usb, motherboardImage.ActualHeight * 0.36);
+        usbCanvas.Children.Add(usb);
+    }
+    
+    private void InitializeBIOS()
+    {
+        var btn = new Button
+        {
+            Content = "M_BIOS",
+            Width = 40,
+            Height = 30,
+            Tag = "M_BIOS"
+        };
+
+        btn.Click += BiosClick;
+        Canvas.SetLeft(btn, motherboardImage.ActualWidth * 0.35);
+        Canvas.SetTop(btn, motherboardImage.ActualHeight * 0.57);
+        usbCanvas.Children.Add(btn);
+    }
+
+    private void BtnVoltage_Click(object sender, RoutedEventArgs e)
+    {
+        Button btn = (Button)sender;
+        string lineName = btn.Content?.ToString();
+
+        if (lineName == null)
+            return;
+
+        currentElement = lineName;
+        HandleMeasurement(lineName);
+    }
+
+    private void USBPortButton_Click(object sender, RoutedEventArgs e)
+    {
+        Button btn = sender as Button;
+        if (btn == null) return;
+        string element = btn.Tag?.ToString();
+
+        if (element == null)
+            return;
+
+        currentElement = element;
+        HandleMeasurement(element);
+    }
+
+    private void BiosClick(object sender, RoutedEventArgs e)
+    {
+        Button btn = (Button)sender;
+        string element = btn.Tag?.ToString();
+
+        if (element == null)
+            return;
+
+        currentElement = element;
+        HandleMeasurement(element);
+    }
+
+    
+    private void HandleMeasurement(string element)
+    {
+        if (standardValues.ContainsKey(element))
+        {
+            Measurement[] measurements = standardValues[element];
+            string selectedTool = GetSelectedTool();
+
+            foreach (Measurement measurement in measurements)
+            {
+                OscillographSineImage.Visibility = Visibility.Collapsed;
+                OscillographPlainImage.Visibility = Visibility.Collapsed;
+
+                if (measurement.Instrument == selectedTool)
+                {
+                    switch (selectedTool)
+                    {
+                        case "Омметр":
+                            MeasurementText.Text = $"Измерение сопротивления на {element}: {measurement.GeneratedValue} Ohm";
+                            break;
+                        case "Вольтметр":
+                            double deviation = 0.05 * measurement.StandardValue;
+                            MeasurementText.Text = $"Напряжение на {element}: {measurement.GeneratedValue}V\nДопустимое отклонение: ±{deviation}V";
+                            break;
+                        case "Осциллограф":
+                            string signal;
+                            if (measurement.GeneratedValue == 1)
+                            {
+                                signal = "Синусоидальный сигнал";
+                                OscillographSineImage.Visibility = Visibility.Visible;
+                            }
+                            else
+                            {
+                                signal = "Отсутствие импульсов";
+                                OscillographPlainImage.Visibility = Visibility.Visible;
+                            }
+                            
+                            // Simulating oscilloscope: displaying different states
+                            MeasurementText.Text = $"{element}: {signal}";
+                            
+                            break;
+                        default:
+                            MeasurementText.Text = $"Невозможно выполнить измерение на \"{element}\" с помощью \"{selectedTool}\".";
+                            break;
+                    }
+                    return;
+                }
+            }
+            MeasurementText.Text = $"Не найден подходящий инструмент для измерения {element}.";
+        }
+        else
+        {
+            MeasurementText.Text = $"Для {element} не заданы эталонные значения.";
+        }
+    }
+    
     private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         // Получаем позицию клика относительно изображения
-        Point position = e.GetPosition(motherboardImage);
-        
-        Console.WriteLine(position);
-        
+        var position = e.GetPosition(motherboardImage);
+        Console.WriteLine($"Click at {position}");
+
+        var imageWidth = motherboardImage.ActualWidth;
+        var imageHeight = motherboardImage.ActualHeight;
+        var relativePosition = new Point(e.GetPosition(motherboardImage).X / imageWidth,
+            e.GetPosition(motherboardImage).Y / imageHeight);
+        Console.WriteLine($"Относительное положение клика: X={relativePosition.X}, Y={relativePosition.Y}");
+
         // Определяем компонент, на который был сделан щелчок
         foreach (var component in components)
-        {
             if (component.Area.Contains(position))
             {
-                Console.WriteLine(component.Name);
-                // Очищаем список неисправностей
-                faultsListBox.ItemsSource = null;
-
-                // Загружаем неисправности для выбранного компонента
-                faultsListBox.ItemsSource = component.Faults;
-                
-                BackButton_Click(null, null);
-                
+                MeasureComponent(component);
                 // Выходим из цикла, так как уже нашли компонент
                 break;
             }
+    }
+
+    private void MeasureComponent(Component component)
+    {
+        // Здесь вы можете выполнить измерения для выбранного компонента
+        // Например, вы можете отобразить измерения в каком-то элементе управления
+        // или вывести сообщение с результатами измерений
+        // Для примера, просто выведем имя компонента в консоль
+        Console.WriteLine($"Выполнены измерения для компонента: {component.Name}");
+    }
+
+    private void RadioButton_Group_Checked(object sender, RoutedEventArgs e)
+    {
+        var selectedRadioButton = (RadioButton)sender;
+        if (selectedRadioButton != null)
+        {
+            groundColor = selectedRadioButton.Content.ToString();
+            Console.WriteLine($"Выбранный цвет земли (GND): {groundColor}");
         }
     }
-}
-
-public class FaultGroup
-{
-    public FaultGroup(string name, ObservableCollection<Fault> faults)
+    
+    private string GetSelectedTool()
     {
-        Name = name;
-        Faults = faults;
+        foreach (var item in LogicalTreeHelper.GetChildren(toolbar))
+            if (item is RadioButton radioButton && radioButton.IsChecked == true)
+                return radioButton.Content.ToString();
+        return null; // If no tool is selected
     }
 
-    public string Name { get; set; }
-    public ObservableCollection<Fault> Faults { get; set; }
-}
-
-public class Fault
+private void WorkingButton_Click(object sender, RoutedEventArgs e)
 {
-    public Fault(string name, Measurement measurement, string solution)
+    if (currentElement == null)
     {
-        Name = name;
-        Measurement = measurement;
-        Solution = solution;
+        // Handle the case where no element is selected
+        MessageBox.Show("No element selected.", "Error");
+        return;
     }
 
-    public string Name { get; set; }
-    public Measurement Measurement { get; set; }
-    public string Solution { get; set; }
-}
-
-public class Measurement
-{
-    public Measurement(string working, string notWorking)
+    Button btn = (Button)sender;
+    bool isYesClicked = btn.Tag.ToString() == "yesBtn" ? true : false;
+    
+    if (standardValues.ContainsKey(currentElement))
     {
-        Working = working;
-        NotWorking = notWorking;
+        Measurement[] measurements = standardValues[currentElement];
+        foreach (Measurement measurement in measurements)
+        {
+            // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if dont want to allow making diagnosis without choosing correct tool
+            {
+                switch (measurement.Instrument)
+                {
+                    case "Осциллограф":
+                        if (measurement.StandardValue == measurement.GeneratedValue)
+                        {
+                            ShowResultMessage("BIOS is working correctly.", "Верно!", "Неверно!", isYesClicked);
+                        }
+                        else
+                        {
+                            ShowResultMessage("BIOS is not working correctly.", "Неверно!", "Верно!", isYesClicked);
+                        }
+                        return;
+                    case "Вольтметр":
+                        // For voltage measurements, check if the generated value is within 5% deviation
+                        double deviation = 0.05 * measurement.StandardValue;
+                        if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= deviation)
+                        {
+                            ShowResultMessage("Voltage measurement is within acceptable deviation.", "Верно!", "Неверно!", isYesClicked);
+                        }
+                        else
+                        {
+                            ShowResultMessage("Voltage measurement is not within acceptable deviation.", "Неверно!", "Верно!", isYesClicked);
+                        }
+                        return;
+                    case "Омметр":
+                        // For resistance measurements, check if the measured resistance falls within an acceptable range
+                        if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= 100)
+                        {
+                            ShowResultMessage("Resistance measurement is within acceptable range.", "Верно!", "Неверно!", true);
+                        }
+                        else
+                        {
+                            ShowResultMessage("Resistance measurement is not within acceptable range.", "Неверно!", "Верно!", false);
+                        }
+                        return;                        
+                }
+            }
+        }
+    }
+    else
+    {
+        // Handle the case where the selected element doesn't have standard values defined
+        MessageBox.Show($"No standard values defined for {currentElement}.", "Error");
+    }
+    
+}    
+    private void ShowResultMessage(string message, string correctTitle, string incorrectTitle, bool isCorrect)
+    {
+        if (isCorrect)
+        {
+            MessageBox.Show($"{correctTitle} {message}", correctTitle);
+        }
+        else
+        {
+            MessageBox.Show($"{incorrectTitle} {message}", incorrectTitle);
+        }
     }
 
-    public string Working { get; set; }
-    public string NotWorking { get; set; }
 }
 
 public class Component
@@ -369,15 +408,22 @@ public class Component
     {
         Name = name;
         Area = area;
-        Faults = new List<Fault>();
     }
 
     public string Name { get; set; }
     public Rect Area { get; set; }
-    public List<Fault> Faults { get; set; }
+}
 
-    public void AddFault(string _faultName, string _workingCondition, string _notWorkingCondition, string _solution)
+public class Measurement
+{
+    public Measurement(string instrument, double standardValue, double generatedValue)
     {
-        Faults.Add(new Fault(_faultName, new Measurement(_workingCondition, _notWorkingCondition), _solution));
+        Instrument = instrument;
+        StandardValue = standardValue;
+        GeneratedValue = generatedValue;
     }
+
+    public string Instrument { get; set; }
+    public double StandardValue { get; set; }
+    public double GeneratedValue { get; set; }
 }
