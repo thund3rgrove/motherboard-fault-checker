@@ -8,8 +8,6 @@ public partial class MainWindow : Window
 {
     private static readonly Random random = new();
 
-    private string currentElement;
-
     private static readonly Dictionary<string, Measurement[]> standardValues = new()
     {
         {
@@ -38,12 +36,22 @@ public partial class MainWindow : Window
             {
                 new("Осциллограф", 1, random.NextInt64(0, 2)) // 0, 1 as bool
             }
+        },
+        {
+            "USB_DATA", new Measurement[]
+            {
+                new("Вольтметр", 0.575 / 1000, GenerateRandomDouble(0.150 / 1000.0, 1.0 / 1000.0)),
+                new("Омметр", 1000, GenerateRandomDouble(900, 1100))
+            }
         }
     };
 
-    private List<Component> components = new();
-    private string groundColor;
     private readonly Dictionary<string, Measurement> measurementMap = new();
+
+    private List<Component> components = new();
+
+    private string currentElement;
+    private string groundColor;
 
     public MainWindow()
     {
@@ -164,7 +172,7 @@ public partial class MainWindow : Window
         Canvas.SetTop(usb, motherboardImage.ActualHeight * 0.36);
         usbCanvas.Children.Add(usb);
     }
-    
+
     private void InitializeBIOS()
     {
         var btn = new Button
@@ -183,8 +191,8 @@ public partial class MainWindow : Window
 
     private void BtnVoltage_Click(object sender, RoutedEventArgs e)
     {
-        Button btn = (Button)sender;
-        string lineName = btn.Content?.ToString();
+        var btn = (Button)sender;
+        var lineName = btn.Content?.ToString();
 
         if (lineName == null)
             return;
@@ -195,9 +203,9 @@ public partial class MainWindow : Window
 
     private void USBPortButton_Click(object sender, RoutedEventArgs e)
     {
-        Button btn = sender as Button;
+        var btn = sender as Button;
         if (btn == null) return;
-        string element = btn.Tag?.ToString();
+        var element = btn.Tag?.ToString();
 
         if (element == null)
             return;
@@ -208,8 +216,8 @@ public partial class MainWindow : Window
 
     private void BiosClick(object sender, RoutedEventArgs e)
     {
-        Button btn = (Button)sender;
-        string element = btn.Tag?.ToString();
+        var btn = (Button)sender;
+        var element = btn.Tag?.ToString();
 
         if (element == null)
             return;
@@ -218,15 +226,15 @@ public partial class MainWindow : Window
         HandleMeasurement(element);
     }
 
-    
+
     private void HandleMeasurement(string element)
     {
         if (standardValues.ContainsKey(element))
         {
-            Measurement[] measurements = standardValues[element];
-            string selectedTool = GetSelectedTool();
+            var measurements = standardValues[element];
+            var selectedTool = GetSelectedTool();
 
-            foreach (Measurement measurement in measurements)
+            foreach (var measurement in measurements)
             {
                 OscillographSineImage.Visibility = Visibility.Collapsed;
                 OscillographPlainImage.Visibility = Visibility.Collapsed;
@@ -236,11 +244,26 @@ public partial class MainWindow : Window
                     switch (selectedTool)
                     {
                         case "Омметр":
-                            MeasurementText.Text = $"Измерение сопротивления на {element}: {measurement.GeneratedValue} Ohm";
+                            MeasurementText.Text =
+                                $"Измерение сопротивления на {element}: {measurement.GeneratedValue} Ohm";
                             break;
                         case "Вольтметр":
-                            double deviation = 0.05 * measurement.StandardValue;
-                            MeasurementText.Text = $"Напряжение на {element}: {measurement.GeneratedValue}V\nДопустимое отклонение: ±{deviation}V";
+                            if (element == "USB_DATA")
+                            {
+                                var voltage = groundColor == "Красный"
+                                    ? measurement.GeneratedValue
+                                    : GenerateRandomDouble(0, 123123123);
+
+                                MeasurementText.Text = $"Напряжение на {element}: {AdjustVoltage(voltage)}  \n" +
+                                                       $"Убедитесь, что Красный щуп установлен на GND.";
+                            }
+                            else
+                            {
+                                var deviation = 0.05 * measurement.StandardValue;
+                                MeasurementText.Text =
+                                    $"Напряжение на {element}: {measurement.GeneratedValue}V\nДопустимое отклонение: ±{deviation}V";
+                            }
+
                             break;
                         case "Осциллограф":
                             string signal;
@@ -254,18 +277,21 @@ public partial class MainWindow : Window
                                 signal = "Отсутствие импульсов";
                                 OscillographPlainImage.Visibility = Visibility.Visible;
                             }
-                            
+
                             // Simulating oscilloscope: displaying different states
                             MeasurementText.Text = $"{element}: {signal}";
-                            
+
                             break;
                         default:
-                            MeasurementText.Text = $"Невозможно выполнить измерение на \"{element}\" с помощью \"{selectedTool}\".";
+                            MeasurementText.Text =
+                                $"Невозможно выполнить измерение на \"{element}\" с помощью \"{selectedTool}\".";
                             break;
                     }
+
                     return;
                 }
             }
+
             MeasurementText.Text = $"Не найден подходящий инструмент для измерения {element}.";
         }
         else
@@ -273,7 +299,7 @@ public partial class MainWindow : Window
             MeasurementText.Text = $"Для {element} не заданы эталонные значения.";
         }
     }
-    
+
     private void Image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
         // Получаем позицию клика относительно изображения
@@ -296,12 +322,44 @@ public partial class MainWindow : Window
             }
     }
 
+    public static string AdjustVoltage(double value)
+    {
+        // Define the threshold values for switching between units
+        var kThreshold = 1e6; // 1 MV (Megavolt)
+        var VThreshold = 1e3; // 1 kV (Kilovolt)
+        double mVThreshold = 1; // 1 V (Volt)
+
+        // Check if the value is larger than or equal to the kilovolt threshold
+        if (Math.Abs(value) >= kThreshold)
+        {
+            // Convert the value to megavolts and format it to 3 decimal places
+            var voltageInMegavolts = value / 1e6;
+            return $"{voltageInMegavolts:F2} MV"; // Format to 2 decimal places and append 'MV'
+        }
+        // Check if the value is larger than or equal to the volt threshold
+
+        if (Math.Abs(value) >= VThreshold)
+        {
+            // Convert the value to kilovolts and format it to 3 decimal places
+            var voltageInKilovolts = value / 1e3;
+            return $"{voltageInKilovolts:F2} kV"; // Format to 2 decimal places and append 'kV'
+        }
+        // Check if the value is larger than or equal to the millivolt threshold
+
+        if (Math.Abs(value) >= mVThreshold)
+        {
+            // Format the value in volts to 3 decimal places and append 'V'
+            return $"{value:F2} V"; // Format to 2 decimal places and append 'V'
+        }
+
+        // Convert the value to millivolts and format it to 3 decimal places
+        var voltageInMillivolts = value * 1e3;
+        return $"{voltageInMillivolts:F2} mV"; // Format to 2 decimal places and append 'mV'
+    }
+
+
     private void MeasureComponent(Component component)
     {
-        // Здесь вы можете выполнить измерения для выбранного компонента
-        // Например, вы можете отобразить измерения в каком-то элементе управления
-        // или вывести сообщение с результатами измерений
-        // Для примера, просто выведем имя компонента в консоль
         Console.WriteLine($"Выполнены измерения для компонента: {component.Name}");
     }
 
@@ -314,7 +372,7 @@ public partial class MainWindow : Window
             Console.WriteLine($"Выбранный цвет земли (GND): {groundColor}");
         }
     }
-    
+
     private string GetSelectedTool()
     {
         foreach (var item in LogicalTreeHelper.GetChildren(toolbar))
@@ -323,83 +381,74 @@ public partial class MainWindow : Window
         return null; // If no tool is selected
     }
 
-private void WorkingButton_Click(object sender, RoutedEventArgs e)
-{
-    if (currentElement == null)
+    private void WorkingButton_Click(object sender, RoutedEventArgs e)
     {
-        // Handle the case where no element is selected
-        MessageBox.Show("No element selected.", "Error");
-        return;
-    }
-
-    Button btn = (Button)sender;
-    bool isYesClicked = btn.Tag.ToString() == "yesBtn" ? true : false;
-    
-    if (standardValues.ContainsKey(currentElement))
-    {
-        Measurement[] measurements = standardValues[currentElement];
-        foreach (Measurement measurement in measurements)
+        if (currentElement == null)
         {
-            // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if dont want to allow making diagnosis without choosing correct tool
-            {
+            // Handle the case where no element is selected
+            MessageBox.Show("No element selected.", "Error");
+            return;
+        }
+
+        var btn = (Button)sender;
+        var isYesClicked = btn.Tag.ToString() == "yesBtn" ? true : false;
+
+        if (standardValues.ContainsKey(currentElement))
+        {
+            var measurements = standardValues[currentElement];
+            foreach (var measurement in measurements)
+                // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if dont want to allow making diagnosis without choosing correct tool
                 switch (measurement.Instrument)
                 {
                     case "Осциллограф":
                         if (measurement.StandardValue == measurement.GeneratedValue)
-                        {
                             ShowResultMessage("BIOS is working correctly.", "Верно!", "Неверно!", isYesClicked);
-                        }
                         else
-                        {
                             ShowResultMessage("BIOS is not working correctly.", "Неверно!", "Верно!", isYesClicked);
-                        }
+
                         return;
+
                     case "Вольтметр":
                         // For voltage measurements, check if the generated value is within 5% deviation
-                        double deviation = 0.05 * measurement.StandardValue;
+                        var deviation = currentElement == "USB_DATA"
+                            ? 0.125 / 1000
+                            : 0.05 * measurement.StandardValue;
+
                         if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= deviation)
-                        {
-                            ShowResultMessage("Voltage measurement is within acceptable deviation.", "Верно!", "Неверно!", isYesClicked);
-                        }
+                            ShowResultMessage("Напряжение находится в пределах допустимого отклонения.", "Верно",
+                                "Неверно", isYesClicked);
                         else
-                        {
-                            ShowResultMessage("Voltage measurement is not within acceptable deviation.", "Неверно!", "Верно!", isYesClicked);
-                        }
+                            ShowResultMessage("Напряжение не соответствует допустимому отклонению.", "Неверно", "Верно",
+                                isYesClicked);
+
                         return;
+
                     case "Омметр":
                         // For resistance measurements, check if the measured resistance falls within an acceptable range
                         if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= 100)
-                        {
-                            ShowResultMessage("Resistance measurement is within acceptable range.", "Верно!", "Неверно!", true);
-                        }
+                            ShowResultMessage("Сопротивление находится в допустимом диапазоне.", "Верно", "Неверно",
+                                true);
                         else
-                        {
-                            ShowResultMessage("Resistance measurement is not within acceptable range.", "Неверно!", "Верно!", false);
-                        }
-                        return;                        
+                            ShowResultMessage("Сопротивление не соответствует допустимому диапазону.", "Неверно",
+                                "Верно", false);
+
+                        return;
                 }
-            }
-        }
-    }
-    else
-    {
-        // Handle the case where the selected element doesn't have standard values defined
-        MessageBox.Show($"No standard values defined for {currentElement}.", "Error");
-    }
-    
-}    
-    private void ShowResultMessage(string message, string correctTitle, string incorrectTitle, bool isCorrect)
-    {
-        if (isCorrect)
-        {
-            MessageBox.Show($"{correctTitle} {message}", correctTitle);
         }
         else
         {
-            MessageBox.Show($"{incorrectTitle} {message}", incorrectTitle);
+            // Handle the case where the selected element doesn't have standard values defined
+            MessageBox.Show($"No standard values defined for {currentElement}.", "Error");
         }
     }
 
+    private void ShowResultMessage(string message, string correctTitle, string incorrectTitle, bool isCorrect)
+    {
+        if (isCorrect)
+            MessageBox.Show($"{correctTitle}. {message}", correctTitle);
+        else
+            MessageBox.Show($"{incorrectTitle}. {message}", incorrectTitle);
+    }
 }
 
 public class Component

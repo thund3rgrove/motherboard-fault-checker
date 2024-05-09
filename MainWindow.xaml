@@ -59,19 +59,19 @@
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
-                
+
                 <Grid Grid.Row="0">
                     <TextBlock x:Name="GndDipstick" Text="" />
                     <TextBlock x:Name="MeasurementText" Margin="10" Grid.Column="0" />
                     <Image x:Name="OscillographSineImage" Source="Assets\Sine-Wave.png" Visibility="Collapsed" />
                     <Image x:Name="OscillographPlainImage" Source="Assets\No-Wave.png" Visibility="Collapsed" />
                 </Grid>
-                
+
                 <StackPanel Grid.Row="1" x:Name="ConfirmationPanel" Margin="10" Visibility="Visible"> <!--Visibility: Collapsed-->
                     <TextBlock Text="Is it working correctly?" />
                     <StackPanel Orientation="Horizontal">
-                        <Button Content="Yes" Tag="yesBtn" Click="WorkingButton_Click" Margin="5"/>
-                        <Button Content="No" Tag="noBtn" Click="WorkingButton_Click" Margin="5"/>
+                        <Button Content="Yes" Tag="yesBtn" Click="WorkingButton_Click" Margin="5" />
+                        <Button Content="No" Tag="noBtn" Click="WorkingButton_Click" Margin="5" />
                     </StackPanel>
                 </StackPanel>
             </Grid>
