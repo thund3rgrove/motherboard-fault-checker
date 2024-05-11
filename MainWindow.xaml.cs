@@ -180,101 +180,101 @@ public partial class MainWindow : Window
 
     private void HandleMeasurement(string element)
     {
-        if (StandardValues.ContainsKey(element))
-        {
-            var measurements = StandardValues[element];
-            var selectedTool = GetSelectedTool();
-
-            foreach (var measurement in measurements)
-            {
-                ConfirmationPanel.Visibility = Visibility.Visible;
-                OscillographSineImage.Visibility = Visibility.Collapsed;
-                OscillographPlainImage.Visibility = Visibility.Collapsed;
-
-                if (measurement.Instrument == selectedTool)
-                {
-                    switch (selectedTool)
-                    {
-                        case "Омметр":
-                            MeasurementText.Text =
-                                $"Измерение сопротивления на {element}: {measurement.GeneratedValue} Ohm";
-                            break;
-                        case "Вольтметр":
-                            if (element == "USB_DATA")
-                            {
-                                var voltage = groundColor == "Красный"
-                                    ? measurement.GeneratedValue
-                                    : GenerateRandomDouble(0, 123123123);
-
-                                MeasurementText.Text = $"Напряжение на {element}: {AdjustVoltage(voltage)}  \n" +
-                                                       $"Убедитесь, что Красный щуп установлен на GND.";
-                            }
-                            else
-                            {
-                                var deviation = 0.05 * measurement.StandardValue;
-                                MeasurementText.Text =
-                                    $"Напряжение на {element}: {measurement.GeneratedValue}V\nДопустимое отклонение: ±{deviation}V";
-                            }
-
-                            break;
-                        case "Осциллограф":
-                            string signal;
-                            switch (element)
-                            {
-                                case "M_BIOS":
-                                    if ((int)measurement.GeneratedValue > 0)
-                                    {
-                                        signal = "Синусоидальный сигнал";
-                                        OscillographSineImage.Visibility = Visibility.Visible;
-                                    }
-                                    else
-                                    {
-                                        signal = "Отсутствие импульсов";
-                                        OscillographPlainImage.Visibility = Visibility.Visible;
-                                    }
-
-                                    // Simulating oscilloscope: displaying different states
-                                    MeasurementText.Text = $"{element}: {signal}";
-
-                                    return;
-
-                                case "RTC":
-                                    if (measurement.GeneratedValue > 0)
-                                    {
-                                        signal = "Синусоидальный сигнал\n";
-                                        OscillographSineImage.Visibility = Visibility.Visible;
-                                    }
-                                    else
-                                    {
-                                        signal = "Отсутствие сигнала\n";
-                                        OscillographPlainImage.Visibility = Visibility.Visible;
-                                    }
-
-                                    signal += $"Частота {measurement.GeneratedValue}\n" +
-                                              $"Норма: {measurement.StandardValue}";
-
-                                    MeasurementText.Text = signal;
-
-                                    return;
-                            }
-
-                            break;
-                        default:
-                            MeasurementText.Text =
-                                $"Невозможно выполнить измерение на \"{element}\" с помощью \"{selectedTool}\".";
-                            break;
-                    }
-
-                    return;
-                }
-            }
-
-            MeasurementText.Text = $"Не найден подходящий инструмент для измерения {element}.";
-        }
-        else
+        if (!StandardValues.ContainsKey(element))
         {
             MeasurementText.Text = $"Для {element} не заданы эталонные значения.";
+            return;
         }
+        
+        var measurements = StandardValues[element];
+        var selectedTool = GetSelectedTool();
+
+        foreach (var measurement in measurements)
+        {
+            ConfirmationPanel.Visibility = Visibility.Visible;
+            OscillographSineImage.Visibility = Visibility.Collapsed;
+            OscillographPlainImage.Visibility = Visibility.Collapsed;
+
+            if (measurement.Instrument == selectedTool)
+            {
+                switch (selectedTool)
+                {
+                    case "Омметр":
+                        MeasurementText.Text =
+                            $"Измерение сопротивления на {element}: {measurement.GeneratedValue} Ohm";
+                        break;
+                    case "Вольтметр":
+                        if (element == "USB_DATA")
+                        {
+                            var voltage = groundColor == "Красный"
+                                ? measurement.GeneratedValue
+                                : GenerateRandomDouble(0, 123123123);
+
+                            MeasurementText.Text = $"Напряжение на {element}: {AdjustVoltage(voltage)}  \n" +
+                                                   $"Убедитесь, что Красный щуп установлен на GND.";
+                        }
+                        else
+                        {
+                            var deviation = 0.05 * measurement.StandardValue;
+                            MeasurementText.Text =
+                                $"Напряжение на {element}: {measurement.GeneratedValue}V\nДопустимое отклонение: ±{deviation}V";
+                        }
+
+                        break;
+                    case "Осциллограф":
+                        string signal;
+                        switch (element)
+                        {
+                            case "M_BIOS":
+                                if ((int)measurement.GeneratedValue > 0)
+                                {
+                                    signal = "Синусоидальный сигнал";
+                                    OscillographSineImage.Visibility = Visibility.Visible;
+                                }
+                                else
+                                {
+                                    signal = "Отсутствие импульсов";
+                                    OscillographPlainImage.Visibility = Visibility.Visible;
+                                }
+
+                                // Simulating oscilloscope: displaying different states
+                                MeasurementText.Text = $"{element}: {signal}";
+
+                                return;
+
+                            case "RTC":
+                                if (measurement.GeneratedValue > 0)
+                                {
+                                    signal = "Синусоидальный сигнал\n";
+                                    OscillographSineImage.Visibility = Visibility.Visible;
+                                }
+                                else
+                                {
+                                    signal = "Отсутствие сигнала\n";
+                                    OscillographPlainImage.Visibility = Visibility.Visible;
+                                }
+
+                                signal += $"Частота {measurement.GeneratedValue}\n" +
+                                          $"Норма: {measurement.StandardValue}";
+
+                                MeasurementText.Text = signal;
+
+                                return;
+                        }
+
+                        break;
+                    default:
+                        MeasurementText.Text =
+                            $"Невозможно выполнить измерение на \"{element}\" с помощью \"{selectedTool}\".";
+                        break;
+                }
+
+                return;
+            }
+        }
+
+        MeasurementText.Text = $"Не найден подходящий инструмент для измерения {element}.";
+    
     }
 
     // TODO: delete in future builds
@@ -376,74 +376,73 @@ public partial class MainWindow : Window
         var btn = (Button)sender;
         var isYesClicked = btn.Tag.ToString() == "yesBtn";
 
-        if (StandardValues.ContainsKey(currentElement))
-        {
-            var measurements = StandardValues[currentElement];
-            foreach (var measurement in measurements)
-                // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if don't want to allow making diagnosis without choosing correct tool
-                switch (measurement.Instrument)
-                {
-                    case "Осциллограф":
-                        switch (currentElement)
-                        {
-                            case "M_BIOS":
-                                if (measurement.StandardValue == measurement.GeneratedValue)
-                                    ShowResultMessage("BIOS исправна.", "Верно", "Неверно", isYesClicked);
-                                else
-                                    ShowResultMessage("Неисправна микросхема BIOS, либо повреждена (стерта) прошивка",
-                                        "Неверно", "Верно", isYesClicked);
-                                return;
-                            case "RTC":
-                                if (measurement.StandardValue == measurement.GeneratedValue)
-                                    ShowResultMessage("RTC исправны.", "Верно", "Неверно", isYesClicked);
-                                else
-                                    ShowResultMessage("RTC неисправны.",
-                                        "Неверно", "Верно", isYesClicked);
-                                return;
-                        }
-
-                        return;
-
-                    case "Вольтметр":
-                        // For voltage measurements, check if the generated value is within 5% deviation
-                        var deviation = currentElement == "USB_DATA"
-                            ? 0.125 / 1000
-                            : 0.05 * measurement.StandardValue;
-
-                        if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= deviation)
-                            ShowResultMessage("Напряжение находится в пределах допустимого отклонения.", "Верно",
-                                "Неверно", isYesClicked);
-                        else
-                            ShowResultMessage("Напряжение не соответствует допустимому отклонению.", "Неверно", "Верно",
-                                isYesClicked);
-
-                        return;
-
-                    case "Омметр":
-                        // For resistance measurements, check if the measured resistance falls within an acceptable range
-                        if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= 100)
-                            ShowResultMessage("Сопротивление находится в допустимом диапазоне.", "Верно", "Неверно",
-                                true);
-                        else
-                            ShowResultMessage("Сопротивление не соответствует допустимому диапазону.", "Неверно",
-                                "Верно", false);
-
-                        return;
-                }
-        }
-        else
+        if (!StandardValues.ContainsKey(currentElement))
         {
             // Handle the case where the selected element doesn't have standard values defined
             MessageBox.Show($"No standard values defined for {currentElement}.", "Error");
+            return;
+        }
+        
+        var measurements = StandardValues[currentElement];
+        foreach (var measurement in measurements)
+        {
+            // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if don't want to allow making diagnosis without choosing correct tool
+            switch (measurement.Instrument)
+            {
+                case "Осциллограф":
+                    switch (currentElement)
+                    {
+                        case "M_BIOS":
+                            if (measurement.StandardValue == measurement.GeneratedValue)
+                                ShowResultMessage("BIOS исправна.", "Верно", "Неверно", isYesClicked);
+                            else
+                                ShowResultMessage("Неисправна микросхема BIOS, либо повреждена (стерта) прошивка",
+                                    "Неверно", "Верно", isYesClicked);
+                            return;
+                        case "RTC":
+                            if (measurement.StandardValue == measurement.GeneratedValue)
+                                ShowResultMessage("RTC исправны.", "Верно", "Неверно", isYesClicked);
+                            else
+                                ShowResultMessage("RTC неисправны.",
+                                    "Неверно", "Верно", isYesClicked);
+                            return;
+                    }
+
+                    return;
+
+                case "Вольтметр":
+                    // For voltage measurements, check if the generated value is within 5% deviation
+                    var deviation = currentElement == "USB_DATA"
+                        ? 0.125 / 1000
+                        : 0.05 * measurement.StandardValue;
+
+                    if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= deviation)
+                        ShowResultMessage("Напряжение находится в пределах допустимого отклонения.", "Верно",
+                            "Неверно", isYesClicked);
+                    else
+                        ShowResultMessage("Напряжение не соответствует допустимому отклонению.", "Неверно", "Верно",
+                            isYesClicked);
+
+                    return;
+
+                case "Омметр":
+                    // For resistance measurements, check if the measured resistance falls within an acceptable range
+                    if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= 100)
+                        ShowResultMessage("Сопротивление находится в допустимом диапазоне.", "Верно", "Неверно",
+                            true);
+                    else
+                        ShowResultMessage("Сопротивление не соответствует допустимому диапазону.", "Неверно",
+                            "Верно", false);
+
+                    return;
+            }
         }
     }
 
     private void ShowResultMessage(string message, string correctTitle, string incorrectTitle, bool isCorrect)
     {
-        if (isCorrect)
-            MessageBox.Show($"{correctTitle}. {message}", correctTitle);
-        else
-            MessageBox.Show($"{incorrectTitle}. {message}", incorrectTitle);
+        var title = isCorrect ? correctTitle : incorrectTitle;
+        MessageBox.Show($"{title}. {message}", title);
     }
 }
 
