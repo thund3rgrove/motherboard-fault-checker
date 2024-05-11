@@ -11,36 +11,36 @@ public partial class MainWindow : Window
     {
         {
             "+12V", [
-                new("Вольтметр", 12, GenerateRandomDouble(11, 13)),
-                new("Омметр", 12000, GenerateRandomDouble(11000, 13000))
+                new Measurement("Вольтметр", 12, GenerateRandomDouble(11, 13)),
+                new Measurement("Омметр", 12000, GenerateRandomDouble(11000, 13000))
             ]
         },
         {
             "+3.3V", [
-                new("Вольтметр", 3.3, GenerateRandomDouble(3.0, 3.6)),
-                new("Омметр", 3300, GenerateRandomDouble(3000, 3600))
+                new Measurement("Вольтметр", 3.3, GenerateRandomDouble(3.0, 3.6)),
+                new Measurement("Омметр", 3300, GenerateRandomDouble(3000, 3600))
             ]
         },
         {
             "+5V", [
-                new("Вольтметр", 5, GenerateRandomDouble(4.8, 5.2)),
-                new("Омметр", 5000, GenerateRandomDouble(4800, 5200))
+                new Measurement("Вольтметр", 5, GenerateRandomDouble(4.8, 5.2)),
+                new Measurement("Омметр", 5000, GenerateRandomDouble(4800, 5200))
             ]
         },
         {
             "M_BIOS", [
-                new("Осциллограф", 1, Rnd.NextInt64(0, 2)) // 0, 1 as bool
+                new Measurement("Осциллограф", 1, Rnd.NextInt64(0, 2)) // 0, 1 as bool
             ]
         },
         {
             "USB_DATA", [
-                new("Вольтметр", 0.575 / 1000, GenerateRandomDouble(0.150 / 1000.0, 1.0 / 1000.0)),
-                new("Омметр", 1000, GenerateRandomDouble(900, 1100))
+                new Measurement("Вольтметр", 0.575 / 1000, GenerateRandomDouble(0.150 / 1000.0, 1.0 / 1000.0)),
+                new Measurement("Омметр", 1000, GenerateRandomDouble(900, 1100))
             ]
         },
         {
             "RTC", [
-                new("Осциллограф", 32768, Rnd.NextInt64(0, 2) > 0 ? 32768 : GenerateRandomDouble(0, 100000))
+                new Measurement("Осциллограф", 32768, Rnd.NextInt64(0, 2) > 0 ? 32768 : GenerateRandomDouble(0, 100000))
             ]
         }
     };
@@ -68,17 +68,6 @@ public partial class MainWindow : Window
     private static double GenerateRandomDouble(double minValue, double maxValue)
     {
         return minValue + Rnd.NextDouble() * (maxValue - minValue);
-    }
-
-    private void MotherboardImage_Loaded(object sender, RoutedEventArgs e)
-    {
-        // TODO: delete in future builds
-        // InitializeComponents();
-        // TODO: end
-        InitializePins();
-        InitializeUsbPort();
-        InitializeBios();
-        InitializeRtc();
     }
 
     // TODO: delete in future builds
@@ -149,127 +138,44 @@ public partial class MainWindow : Window
     */
     // TODO: end
 
-    private void InitializePins()
+    private void MotherboardImage_Loaded(object sender, RoutedEventArgs e)
     {
-        AddVoltageButton("+3.3V", 0.9, 0.38, "3.3");
-        AddVoltageButton("+5V", 0.9, 0.31, "5");
-        AddVoltageButton("+12V", 0.9, 0.25, "12");
+        // TODO: delete in future builds
+        // InitializeComponents();
+        // TODO: end
+        InitializeButton("+3.3V", 0.9, 0.38, 50, 30, "+3.3V", Button_Click, 13);
+        InitializeButton("+5V", 0.9, 0.31, 50, 30, "+5V", Button_Click, 13);
+        InitializeButton("+12V", 0.9, 0.25, 50, 30, "+12V", Button_Click, 13);
+
+        InitializeButton("USB_DATA", 0.06, 0.36, 60, 30, "USB_DATA", Button_Click);
+        InitializeButton("M_BIOS", 0.35, 0.57, 40, 30, "M_BIOS", Button_Click);
+        InitializeButton("RTC", 0.13, 0.73, 40, 30, "RTC", Button_Click);
     }
 
-    private void AddVoltageButton(string content, double leftRatio, double topRatio, string voltage)
+    private void InitializeButton(string content, double leftRatio, double topRatio, int width, int height, string tag,
+        RoutedEventHandler handler, int fontSize = 12)
     {
         var btn = new Button
         {
             Content = content,
-            Width = 50,
-            Height = 30,
-            Tag = $"{voltage}V"
+            Width = width,
+            Height = height,
+            Tag = tag,
+            FontSize = fontSize
         };
-        btn.Click += BtnVoltage_Click;
+
+        btn.Click += handler;
         Canvas.SetLeft(btn, motherboardImage.ActualWidth * leftRatio);
         Canvas.SetTop(btn, motherboardImage.ActualHeight * topRatio);
-        btn.FontSize = 13;
         ElementsCanvas.Children.Add(btn);
     }
 
-    private void InitializeUsbPort()
+    private void Button_Click(object sender, RoutedEventArgs e)
     {
-        var usb = new Button
-        {
-            Content = "USB_DATA",
-            Width = 60,
-            Height = 30,
-            Tag = "USB_DATA"
-        };
+        if (sender is not Button btn || btn.Tag == null) return;
 
-        usb.Click += USBPortButton_Click;
-        Canvas.SetLeft(usb, motherboardImage.ActualWidth * 0.06);
-        Canvas.SetTop(usb, motherboardImage.ActualHeight * 0.36);
-        usb.FontSize = 13;
-        ElementsCanvas.Children.Add(usb);
-    }
-
-    private void InitializeBios()
-    {
-        var btn = new Button
-        {
-            Content = "M_BIOS",
-            Width = 40,
-            Height = 30,
-            Tag = "M_BIOS"
-        };
-
-        btn.Click += BiosClick;
-        Canvas.SetLeft(btn, motherboardImage.ActualWidth * 0.35);
-        Canvas.SetTop(btn, motherboardImage.ActualHeight * 0.57);
-        btn.FontSize = 12;
-        ElementsCanvas.Children.Add(btn);
-    }
-
-    private void InitializeRtc()
-    {
-        var btn = new Button
-        {
-            Content = "RTC",
-            Width = 40,
-            Height = 30,
-            Tag = "RTC"
-        };
-
-        btn.Click += RtcClick;
-        Canvas.SetLeft(btn, motherboardImage.ActualWidth * 0.13);
-        Canvas.SetTop(btn, motherboardImage.ActualHeight * 0.73);
-        btn.FontSize = 12;
-        ElementsCanvas.Children.Add(btn);
-    }
-
-    private void BtnVoltage_Click(object sender, RoutedEventArgs e)
-    {
-        var btn = (Button)sender;
-        var lineName = btn.Content?.ToString();
-
-        if (lineName == null)
-            return;
-
-        currentElement = lineName;
-        HandleMeasurement(lineName);
-    }
-
-    private void USBPortButton_Click(object sender, RoutedEventArgs e)
-    {
-        var btn = sender as Button;
-        if (btn == null) return;
-        var element = btn.Tag?.ToString();
-
-        if (element == null)
-            return;
-
-        currentElement = element;
-        HandleMeasurement(element);
-    }
-
-    private void BiosClick(object sender, RoutedEventArgs e)
-    {
-        var btn = (Button)sender;
-        var element = btn.Tag?.ToString();
-
-        if (element == null)
-            return;
-
-        currentElement = element;
-        HandleMeasurement(element);
-    }
-
-    private void RtcClick(object sender, RoutedEventArgs e)
-    {
-        var btn = (Button)sender;
-        var element = btn.Tag?.ToString();
-        
-        if (element == null)
-            return;
-
-        currentElement = element;
-        HandleMeasurement(element);
+        currentElement = btn.Tag.ToString();
+        HandleMeasurement(currentElement);
     }
 
     private void HandleMeasurement(string element)
@@ -331,7 +237,7 @@ public partial class MainWindow : Window
                                     MeasurementText.Text = $"{element}: {signal}";
 
                                     return;
-                                
+
                                 case "RTC":
                                     if (measurement.GeneratedValue > 0)
                                     {
@@ -343,12 +249,12 @@ public partial class MainWindow : Window
                                         signal = "Отсутствие сигнала\n";
                                         OscillographPlainImage.Visibility = Visibility.Visible;
                                     }
-                                    
+
                                     signal += $"Частота {measurement.GeneratedValue}\n" +
                                               $"Норма: {measurement.StandardValue}";
 
                                     MeasurementText.Text = signal;
-                                    
+
                                     return;
                             }
 
@@ -480,7 +386,7 @@ public partial class MainWindow : Window
                     case "Осциллограф":
                         switch (currentElement)
                         {
-                            case "M_BIOS": 
+                            case "M_BIOS":
                                 if (measurement.StandardValue == measurement.GeneratedValue)
                                     ShowResultMessage("BIOS исправна.", "Верно", "Неверно", isYesClicked);
                                 else
@@ -492,9 +398,8 @@ public partial class MainWindow : Window
                                     ShowResultMessage("RTC исправны.", "Верно", "Неверно", isYesClicked);
                                 else
                                     ShowResultMessage("RTC неисправны.",
-                                    "Неверно", "Верно", isYesClicked);
+                                        "Неверно", "Верно", isYesClicked);
                                 return;
-                            
                         }
 
                         return;

@@ -62,13 +62,15 @@
 
                 <Grid Grid.Row="0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    
+
                     <TextBlock x:Name="GndDipstick" Text="" />
-                    <Image Grid.Row="0" x:Name="OscillographSineImage" Source="Assets\Sine-Wave.png" Visibility="Collapsed" />
-                    <Image Grid.Row="0" x:Name="OscillographPlainImage" Source="Assets\No-Wave.png" Visibility="Collapsed" />
+                    <Image Grid.Row="0" x:Name="OscillographSineImage" Source="Assets\Sine-Wave.png"
+                           Visibility="Collapsed" />
+                    <Image Grid.Row="0" x:Name="OscillographPlainImage" Source="Assets\No-Wave.png"
+                           Visibility="Collapsed" />
                     <TextBlock Grid.Row="1" x:Name="MeasurementText" Margin="10" Grid.Column="0" />
                 </Grid>
 
