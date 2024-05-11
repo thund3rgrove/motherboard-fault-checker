@@ -37,6 +37,11 @@ public partial class MainWindow : Window
                 new("Вольтметр", 0.575 / 1000, GenerateRandomDouble(0.150 / 1000.0, 1.0 / 1000.0)),
                 new("Омметр", 1000, GenerateRandomDouble(900, 1100))
             ]
+        },
+        {
+            "RTC", [
+                new("Осциллограф", 32768, Rnd.NextInt64(0, 2) > 0 ? 32768 : GenerateRandomDouble(0, 100000))
+            ]
         }
     };
 
@@ -73,6 +78,7 @@ public partial class MainWindow : Window
         InitializePins();
         InitializeUsbPort();
         InitializeBios();
+        InitializeRtc();
     }
 
     // TODO: delete in future builds
@@ -200,6 +206,23 @@ public partial class MainWindow : Window
         ElementsCanvas.Children.Add(btn);
     }
 
+    private void InitializeRtc()
+    {
+        var btn = new Button
+        {
+            Content = "RTC",
+            Width = 40,
+            Height = 30,
+            Tag = "RTC"
+        };
+
+        btn.Click += RtcClick;
+        Canvas.SetLeft(btn, motherboardImage.ActualWidth * 0.13);
+        Canvas.SetTop(btn, motherboardImage.ActualHeight * 0.73);
+        btn.FontSize = 12;
+        ElementsCanvas.Children.Add(btn);
+    }
+
     private void BtnVoltage_Click(object sender, RoutedEventArgs e)
     {
         var btn = (Button)sender;
@@ -237,6 +260,17 @@ public partial class MainWindow : Window
         HandleMeasurement(element);
     }
 
+    private void RtcClick(object sender, RoutedEventArgs e)
+    {
+        var btn = (Button)sender;
+        var element = btn.Tag?.ToString();
+        
+        if (element == null)
+            return;
+
+        currentElement = element;
+        HandleMeasurement(element);
+    }
 
     private void HandleMeasurement(string element)
     {
@@ -279,19 +313,44 @@ public partial class MainWindow : Window
                             break;
                         case "Осциллограф":
                             string signal;
-                            if ((int)measurement.GeneratedValue == 1)
+                            switch (element)
                             {
-                                signal = "Синусоидальный сигнал";
-                                OscillographSineImage.Visibility = Visibility.Visible;
-                            }
-                            else
-                            {
-                                signal = "Отсутствие импульсов";
-                                OscillographPlainImage.Visibility = Visibility.Visible;
-                            }
+                                case "M_BIOS":
+                                    if ((int)measurement.GeneratedValue > 0)
+                                    {
+                                        signal = "Синусоидальный сигнал";
+                                        OscillographSineImage.Visibility = Visibility.Visible;
+                                    }
+                                    else
+                                    {
+                                        signal = "Отсутствие импульсов";
+                                        OscillographPlainImage.Visibility = Visibility.Visible;
+                                    }
 
-                            // Simulating oscilloscope: displaying different states
-                            MeasurementText.Text = $"{element}: {signal}";
+                                    // Simulating oscilloscope: displaying different states
+                                    MeasurementText.Text = $"{element}: {signal}";
+
+                                    return;
+                                
+                                case "RTC":
+                                    if (measurement.GeneratedValue > 0)
+                                    {
+                                        signal = "Синусоидальный сигнал\n";
+                                        OscillographSineImage.Visibility = Visibility.Visible;
+                                    }
+                                    else
+                                    {
+                                        signal = "Отсутствие сигнала\n";
+                                        OscillographPlainImage.Visibility = Visibility.Visible;
+                                    }
+                                    
+                                    signal += $"Частота {measurement.GeneratedValue}\n" +
+                                              $"Норма: {measurement.StandardValue}";
+
+                                    MeasurementText.Text = signal;
+                                    
+                                    return;
+                            }
 
                             break;
                         default:
@@ -419,13 +478,23 @@ public partial class MainWindow : Window
                 switch (measurement.Instrument)
                 {
                     case "Осциллограф":
-                        if (currentElement == "M_BIOS")
+                        switch (currentElement)
                         {
-                            if (measurement.StandardValue == measurement.GeneratedValue)
-                                ShowResultMessage("BIOS исправна.", "Верно", "Неверно", isYesClicked);
-                            else
-                                ShowResultMessage("Неисправна микросхема BIOS, либо повреждена (стерта) прошивка",
+                            case "M_BIOS": 
+                                if (measurement.StandardValue == measurement.GeneratedValue)
+                                    ShowResultMessage("BIOS исправна.", "Верно", "Неверно", isYesClicked);
+                                else
+                                    ShowResultMessage("Неисправна микросхема BIOS, либо повреждена (стерта) прошивка",
+                                        "Неверно", "Верно", isYesClicked);
+                                return;
+                            case "RTC":
+                                if (measurement.StandardValue == measurement.GeneratedValue)
+                                    ShowResultMessage("RTC исправны.", "Верно", "Неверно", isYesClicked);
+                                else
+                                    ShowResultMessage("RTC неисправны.",
                                     "Неверно", "Верно", isYesClicked);
+                                return;
+                            
                         }
 
                         return;
