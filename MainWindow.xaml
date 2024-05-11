@@ -20,7 +20,7 @@
                 <Separator />
                 <RadioButton Content="Осциллограф" GroupName="Tools" />
                 <Separator />
-                <RadioButton Content="PCIe tester" GroupName="Tools" />
+                <RadioButton Content="Тестер PCIe" GroupName="Tools" />
                 <Separator />
                 <Separator />
 

@@ -43,6 +43,9 @@ public partial class MainWindow : Window
                 new Measurement("Осциллограф", 32768, Rnd.NextInt64(0, 2) > 0 ? 32768 : GenerateRandomDouble(0, 100000))
             ]
         }
+        // TODO: Добавить слот PCIe. Для измерения можно использовать Тестер PCIe.
+        // todo  В качестве стандартного значения используем 1, в качестве сгенерированного - Rnd.NextInt64(0, 2).
+        // todo  Если 1 - изображение есть (нет обрыва на линиях), если 0 - изображения нет (есть обрыв на линиях)
     };
 
     // TODO: delete in future builds
@@ -117,22 +120,6 @@ public partial class MainWindow : Window
                     imageHeight * 0.02313624678663239 // Relative Height
                 )
             ),
-            new("Южный мост/Чипсет",
-                new Rect(
-                    imageWidth * 0.7038508997429306, // Relative X
-                    imageHeight * 0.7455012853470437, // Relative Y
-                    imageWidth * 0.1430591259640103, // Relative Width
-                    imageHeight * 0.12853470437017997 // Relative Height
-                )
-            ),
-            new("Батарейка CMOS",
-                new Rect(
-                    imageWidth * 0.37481491002570694, // Relative X
-                    imageHeight * 0.7660668380462725, // Relative Y
-                    imageWidth * 0.08297429305912596, // Relative Width
-                    imageHeight * 0.07455012853470437 // Relative Height
-                )
-            )
         };
     }
     */
@@ -150,6 +137,10 @@ public partial class MainWindow : Window
         InitializeButton("USB_DATA", 0.06, 0.36, 60, 30, "USB_DATA", Button_Click);
         InitializeButton("M_BIOS", 0.35, 0.57, 40, 30, "M_BIOS", Button_Click);
         InitializeButton("RTC", 0.13, 0.73, 40, 30, "RTC", Button_Click);
+    
+        // TODO: измерять батарейку
+        InitializeButton("CMOS", 0.38, 0.77, 50, 50, "CMOS", Button_Click);
+        // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
     }
 
     private void InitializeButton(string content, double leftRatio, double topRatio, int width, int height, string tag,
@@ -203,6 +194,7 @@ public partial class MainWindow : Window
                         MeasurementText.Text =
                             $"Измерение сопротивления на {element}: {measurement.GeneratedValue} Ohm";
                         break;
+                    
                     case "Вольтметр":
                         if (element == "USB_DATA")
                         {
@@ -221,6 +213,7 @@ public partial class MainWindow : Window
                         }
 
                         break;
+                    
                     case "Осциллограф":
                         string signal;
                         switch (element)
@@ -263,6 +256,11 @@ public partial class MainWindow : Window
                         }
 
                         break;
+                    
+                    // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
+                    case "Тестер PCIe":
+                        break;
+                    
                     default:
                         MeasurementText.Text =
                             $"Невозможно выполнить измерение на \"{element}\" с помощью \"{selectedTool}\".";
@@ -434,6 +432,10 @@ public partial class MainWindow : Window
                         ShowResultMessage("Сопротивление не соответствует допустимому диапазону.", "Неверно",
                             "Верно", false);
 
+                    return;
+                
+                // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
+                case "Тестер PCIe":
                     return;
             }
         }
