@@ -47,6 +47,11 @@ public partial class MainWindow : Window
             "CMOS", [
                 new Measurement("Вольтметр", 3, Rnd.NextInt64(0, 2) > 0 ? GenerateRandomDouble(2.85, 3.15) : GenerateRandomDouble(0, 3.15))
             ]
+        },
+        {
+            "PCIe", [
+                new Measurement("Тестер PCIe", 1, Rnd.NextInt64(0, 2)) // 0, 1 as bool
+            ]
         }
         // TODO: Добавить слот PCIe. Для измерения можно использовать Тестер PCIe.
         // todo  В качестве стандартного значения используем 1, в качестве сгенерированного - Rnd.NextInt64(0, 2).
@@ -146,6 +151,8 @@ public partial class MainWindow : Window
         // TODO: измерять батарейку
         InitializeButton("CMOS", 0.38, 0.77, 50, 50, "CMOS", Button_Click);
         // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
+        // TODO: добавить кнопку PCIe
+        InitializeButton("PCIe", 0.25, 0.71, 275, 25, "PCIe", Button_Click);
     }
 
     private void InitializeButton(string content, double leftRatio, double topRatio, int width, int height, string tag,
@@ -264,6 +271,8 @@ public partial class MainWindow : Window
                     
                     // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
                     case "Тестер PCIe":
+                        string s = measurement.GeneratedValue > 0 ? "Есть сигнал" : "Нет сигнала";
+                        MeasurementText.Text = $"{element}: {s}";
                         break;
                     
                     default:
@@ -441,6 +450,11 @@ public partial class MainWindow : Window
                 
                 // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
                 case "Тестер PCIe":
+                    if (measurement.StandardValue == measurement.GeneratedValue)
+                        ShowResultMessage("PCIe исправна.", "Верно", "Неверно", isYesClicked);
+                    else
+                        ShowResultMessage("PCIe неисправна",
+                            "Неверно", "Верно", isYesClicked);
                     return;
             }
         }
