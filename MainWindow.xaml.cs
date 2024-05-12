@@ -42,6 +42,11 @@ public partial class MainWindow : Window
             "RTC", [
                 new Measurement("Осциллограф", 32768, Rnd.NextInt64(0, 2) > 0 ? 32768 : GenerateRandomDouble(0, 100000))
             ]
+        },
+        {
+            "CMOS", [
+                new Measurement("Вольтметр", 3, Rnd.NextInt64(0, 2) > 0 ? GenerateRandomDouble(2.85, 3.15) : GenerateRandomDouble(0, 3.15))
+            ]
         }
         // TODO: Добавить слот PCIe. Для измерения можно использовать Тестер PCIe.
         // todo  В качестве стандартного значения используем 1, в качестве сгенерированного - Rnd.NextInt64(0, 2).
