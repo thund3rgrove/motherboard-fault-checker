@@ -24,6 +24,8 @@
                 <Separator />
                 <RadioButton Content="Тестер слотов ОЗУ" GroupName="Tools" />
                 <Separator />
+                <RadioButton Content="Тестер сокета CPU" GroupName="Tools" />
+                <Separator />
                 <Separator />
 
                 <!-- Plain text out of radio btn -->

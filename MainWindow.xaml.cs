@@ -58,8 +58,14 @@ public partial class MainWindow : Window
             "RAM", [
                 new Measurement("Тестер слотов ОЗУ", 1, Rnd.NextInt64(0, 2))
             ]
+        },
+        {
+            "Socket", [
+                new Measurement("Тестер сокета CPU", 1, Rnd.NextInt64(0, 2))
+            ]
         }
     };
+
 
     // TODO: delete in future builds
     // private List<Component> components = new();
@@ -134,10 +140,11 @@ public partial class MainWindow : Window
         InitializeButton("USB_DATA", 0.06, 0.36, 60, 30, "USB_DATA", Button_Click);
         InitializeButton("M_BIOS", 0.35, 0.57, 40, 30, "M_BIOS", Button_Click);
         InitializeButton("RTC", 0.13, 0.73, 40, 30, "RTC", Button_Click);
-        
+
         InitializeButton("CMOS", 0.38, 0.77, 50, 50, "CMOS", Button_Click);
         InitializeButton("PCIe", 0.25, 0.71, 275, 25, "PCIe", Button_Click);
         InitializeButton("RAM", 0.71, 0.20, 100, 275, "RAM", Button_Click);
+        InitializeButton("Socket", 0.4, 0.275, 125, 125, "Socket", Button_Click);
     }
 
     private void InitializeButton(string content, double leftRatio, double topRatio, int width, int height, string tag,
@@ -173,7 +180,7 @@ public partial class MainWindow : Window
             MeasurementText.Text = $"Для {element} не заданы эталонные значения.";
             return;
         }
-        
+
         var measurements = StandardValues[element];
         var selectedTool = GetSelectedTool();
 
@@ -191,7 +198,7 @@ public partial class MainWindow : Window
                         MeasurementText.Text =
                             $"Измерение сопротивления на {element}: {measurement.GeneratedValue} Ohm";
                         break;
-                    
+
                     case "Вольтметр":
                         if (element == "USB_DATA")
                         {
@@ -210,7 +217,7 @@ public partial class MainWindow : Window
                         }
 
                         break;
-                    
+
                     case "Осциллограф":
                         string signal;
                         switch (element)
@@ -253,16 +260,25 @@ public partial class MainWindow : Window
                         }
 
                         break;
-                    
+
                     // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
                     case "Тестер PCIe":
-                        MeasurementText.Text = element + ": " + (measurement.GeneratedValue > 0 ? "Есть сигнал" : "Нет сигнала");
+                        MeasurementText.Text = element + ": " +
+                                               (measurement.GeneratedValue > 0 ? "Есть сигнал" : "Нет сигнала");
                         break;
-                    
+
                     case "Тестер слотов ОЗУ":
-                        MeasurementText.Text = element + ": " + (measurement.GeneratedValue > 0 ? "Горят все светодиоды" : "Горит часть светодиодов");
+                        MeasurementText.Text = element + ": " + (measurement.GeneratedValue > 0
+                            ? "Горят все светодиоды"
+                            : "Горит часть светодиодов");
                         break;
-                    
+
+                    case "Тестер сокета CPU":
+                        MeasurementText.Text = element + ": " + (measurement.GeneratedValue > 0
+                            ? "Горят все светодиоды"
+                            : "Горит часть светодиодов");
+                        break;
+
                     default:
                         MeasurementText.Text =
                             $"Невозможно выполнить измерение на \"{element}\" с помощью \"{selectedTool}\".";
@@ -274,7 +290,6 @@ public partial class MainWindow : Window
         }
 
         MeasurementText.Text = $"Не найден подходящий инструмент для измерения {element}.";
-    
     }
 
     // TODO: delete in future builds
@@ -382,10 +397,9 @@ public partial class MainWindow : Window
             MessageBox.Show($"No standard values defined for {currentElement}.", "Error");
             return;
         }
-        
+
         var measurements = StandardValues[currentElement];
         foreach (var measurement in measurements)
-        {
             // if (measurement.Instrument == GetSelectedTool()) // TODO: uncomment if don't want to allow making diagnosis without choosing correct tool
             switch (measurement.Instrument)
             {
@@ -435,7 +449,7 @@ public partial class MainWindow : Window
                             "Верно", false);
 
                     return;
-                
+
                 case "Тестер PCIe":
                     if (measurement.StandardValue == measurement.GeneratedValue)
                         ShowResultMessage("PCIe исправна", "Верно", "Неверно", isYesClicked);
@@ -443,23 +457,27 @@ public partial class MainWindow : Window
                         ShowResultMessage("PCIe неисправна",
                             "Неверно", "Верно", isYesClicked);
                     return;
-                
+
                 case "Тестер слотов ОЗУ":
                     if (measurement.StandardValue == measurement.GeneratedValue)
-                    {
                         ShowResultMessage("Слоты ОЗУ исправны, поскольку горят все светодиоды", "Верно", "Неверно",
                             isYesClicked);
-                        
-                    }
                     else
-                    {
                         ShowResultMessage("Слоты ОЗУ неисправны, поскольку горят не все светодиоды",
                             "Неверно", "Верно", isYesClicked);
-                    }
+
+                    return;
+
+                case "Тестер сокета CPU":
+                    if (measurement.StandardValue == measurement.GeneratedValue)
+                        ShowResultMessage("Сокет CPU исправен, поскольку горят все светодиоды", "Верно", "Неверно",
+                            isYesClicked);
+                    else
+                        ShowResultMessage("Сокет CPU, вероятно, неисправен, поскольку горят не все светодиоды",
+                            "Неверно", "Верно", isYesClicked);
 
                     return;
             }
-        }
     }
 
     private void ShowResultMessage(string message, string correctTitle, string incorrectTitle, bool isCorrect)
