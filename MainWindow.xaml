@@ -22,6 +22,8 @@
                 <Separator />
                 <RadioButton Content="Тестер PCIe" GroupName="Tools" />
                 <Separator />
+                <RadioButton Content="Тестер слотов ОЗУ" GroupName="Tools" />
+                <Separator />
                 <Separator />
 
                 <!-- Plain text out of radio btn -->

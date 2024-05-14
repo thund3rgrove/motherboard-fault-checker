@@ -45,12 +45,18 @@ public partial class MainWindow : Window
         },
         {
             "CMOS", [
-                new Measurement("Вольтметр", 3, Rnd.NextInt64(0, 2) > 0 ? GenerateRandomDouble(2.85, 3.15) : GenerateRandomDouble(0, 3.15))
+                new Measurement("Вольтметр", 3,
+                    Rnd.NextInt64(0, 2) > 0 ? GenerateRandomDouble(2.85, 3.15) : GenerateRandomDouble(0, 3.15))
             ]
         },
         {
             "PCIe", [
                 new Measurement("Тестер PCIe", 1, Rnd.NextInt64(0, 2)) // 0, 1 as bool
+            ]
+        },
+        {
+            "RAM", [
+                new Measurement("Тестер слотов ОЗУ", 1, Rnd.NextInt64(0, 2))
             ]
         }
     };
@@ -131,6 +137,7 @@ public partial class MainWindow : Window
         
         InitializeButton("CMOS", 0.38, 0.77, 50, 50, "CMOS", Button_Click);
         InitializeButton("PCIe", 0.25, 0.71, 275, 25, "PCIe", Button_Click);
+        InitializeButton("RAM", 0.71, 0.20, 100, 275, "RAM", Button_Click);
     }
 
     private void InitializeButton(string content, double leftRatio, double topRatio, int width, int height, string tag,
@@ -249,8 +256,11 @@ public partial class MainWindow : Window
                     
                     // TODO: сделать тут проверку слотов PCIe. Для измерения можно использовать тестер PCIe
                     case "Тестер PCIe":
-                        string s = measurement.GeneratedValue > 0 ? "Есть сигнал" : "Нет сигнала";
-                        MeasurementText.Text = $"{element}: {s}";
+                        MeasurementText.Text = element + ": " + (measurement.GeneratedValue > 0 ? "Есть сигнал" : "Нет сигнала");
+                        break;
+                    
+                    case "Тестер слотов ОЗУ":
+                        MeasurementText.Text = element + ": " + (measurement.GeneratedValue > 0 ? "Горят все светодиоды" : "Горит часть светодиодов");
                         break;
                     
                     default:
@@ -384,16 +394,16 @@ public partial class MainWindow : Window
                     {
                         case "M_BIOS":
                             if (measurement.StandardValue == measurement.GeneratedValue)
-                                ShowResultMessage("BIOS исправна.", "Верно", "Неверно", isYesClicked);
+                                ShowResultMessage("BIOS исправна", "Верно", "Неверно", isYesClicked);
                             else
                                 ShowResultMessage("Неисправна микросхема BIOS, либо повреждена (стерта) прошивка",
                                     "Неверно", "Верно", isYesClicked);
                             return;
                         case "RTC":
                             if (measurement.StandardValue == measurement.GeneratedValue)
-                                ShowResultMessage("RTC исправны.", "Верно", "Неверно", isYesClicked);
+                                ShowResultMessage("RTC исправны", "Верно", "Неверно", isYesClicked);
                             else
-                                ShowResultMessage("RTC неисправны.",
+                                ShowResultMessage("RTC неисправны",
                                     "Неверно", "Верно", isYesClicked);
                             return;
                     }
@@ -407,10 +417,10 @@ public partial class MainWindow : Window
                         : 0.05 * measurement.StandardValue;
 
                     if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= deviation)
-                        ShowResultMessage("Напряжение находится в пределах допустимого отклонения.", "Верно",
+                        ShowResultMessage("Напряжение находится в пределах допустимого отклонения", "Верно",
                             "Неверно", isYesClicked);
                     else
-                        ShowResultMessage("Напряжение не соответствует допустимому отклонению.", "Неверно", "Верно",
+                        ShowResultMessage("Напряжение не соответствует допустимому отклонению", "Неверно", "Верно",
                             isYesClicked);
 
                     return;
@@ -418,20 +428,35 @@ public partial class MainWindow : Window
                 case "Омметр":
                     // For resistance measurements, check if the measured resistance falls within an acceptable range
                     if (Math.Abs(measurement.StandardValue - measurement.GeneratedValue) <= 100)
-                        ShowResultMessage("Сопротивление находится в допустимом диапазоне.", "Верно", "Неверно",
+                        ShowResultMessage("Сопротивление находится в допустимом диапазоне", "Верно", "Неверно",
                             true);
                     else
-                        ShowResultMessage("Сопротивление не соответствует допустимому диапазону.", "Неверно",
+                        ShowResultMessage("Сопротивление не соответствует допустимому диапазону", "Неверно",
                             "Верно", false);
 
                     return;
                 
                 case "Тестер PCIe":
                     if (measurement.StandardValue == measurement.GeneratedValue)
-                        ShowResultMessage("PCIe исправна.", "Верно", "Неверно", isYesClicked);
+                        ShowResultMessage("PCIe исправна", "Верно", "Неверно", isYesClicked);
                     else
                         ShowResultMessage("PCIe неисправна",
                             "Неверно", "Верно", isYesClicked);
+                    return;
+                
+                case "Тестер слотов ОЗУ":
+                    if (measurement.StandardValue == measurement.GeneratedValue)
+                    {
+                        ShowResultMessage("Слоты ОЗУ исправны, поскольку горят все светодиоды", "Верно", "Неверно",
+                            isYesClicked);
+                        
+                    }
+                    else
+                    {
+                        ShowResultMessage("Слоты ОЗУ неисправны, поскольку горят не все светодиоды",
+                            "Неверно", "Верно", isYesClicked);
+                    }
+
                     return;
             }
         }
