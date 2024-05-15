@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("alex007613")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8bf8294f5961fe0811020b8dd57124879b46fa4a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+11ca40772d3a0414a1fa9382f5cc73b5757820e3")]
 [assembly: System.Reflection.AssemblyProductAttribute("MotherboardFaultChecker")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MotherboardFaultChecker")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
