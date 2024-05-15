@@ -1,11 +1,11 @@
-﻿TestProject
+﻿MotherboardFaultChecker
 
 
 winexe
 C#
 .cs
 C:\Users\alex0\Desktop\образование\универ\КУРС 2\семестр 4\ЭВМ\TestProject\obj\Release\net8.0-windows\
-TestProject
+MotherboardFaultChecker
 none
 false
 TRACE;RELEASE;NET;NET8_0;NETCOREAPP

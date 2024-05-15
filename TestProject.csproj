@@ -6,6 +6,12 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <UseWPF>true</UseWPF>
+        <AssemblyName>MotherboardFaultChecker</AssemblyName>
+        <RootNamespace>MotherboardFaultChecker</RootNamespace>
+        <PackageId>MotherboardFaultChecker</PackageId>
+        <Authors>alex007613</Authors>
+        <Company>alex007613</Company>
+        <Product>MotherboardFaultChecker</Product>
     </PropertyGroup>
 
     <ItemGroup>
