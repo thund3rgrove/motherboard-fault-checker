@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestProject", "TestProject.csproj", "{50A24211-8508-4ADF-93CD-62F7F3A9BD49}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotherboardFaultChecker", "MotherboardFaultChecker.csproj", "{50A24211-8508-4ADF-93CD-62F7F3A9BD49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

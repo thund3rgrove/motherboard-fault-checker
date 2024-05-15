@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "3vfdN0Y0jbJ27Zz1JjuA1SuxZYmptUzIKaKUppmDrcn+nGANRsMn5AhVDVXFgDCS4jeN+PI93zLRZnpcxpMUaA==",
+  "dgSpecHash": "RN1zvrPmUWJOsNucocuJHOsMuiTZT1UQehLuAInVWqf+ZTlKjkEB2/eRUrz2mZFNEzzuVRNn4zKhe7veEAH/eA==",
   "success": true,
-  "projectFilePath": "C:\\Users\\alex0\\Desktop\\образование\\универ\\КУРС 2\\семестр 4\\ЭВМ\\TestProject\\TestProject.csproj",
+  "projectFilePath": "C:\\Users\\alex0\\Desktop\\образование\\универ\\КУРС 2\\семестр 4\\ЭВМ\\TestProject\\MotherboardFaultChecker.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
